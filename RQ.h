@@ -1,7 +1,7 @@
 /**
- * File containing the RQ class whose duty is to manage the protocol entities
+ * File containin' the RQ class which duty is to manage the protocol entities
  *
- * @author Roberto francescon
+ * @author Roberto Francescon
  * @brief Class RQ to manage RFC6330 protocol entities
  */
 
