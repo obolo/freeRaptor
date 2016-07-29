@@ -1,9 +1,11 @@
-/* Header file for the Rcodec class which implements a Raptor object
+/**
+ * Header file for the Rcodec class which implements a RaptorQ object
  * which handle coding and decoding.
- * Encoder header for the freeRaptor project
+ * Encoder header for the freeRaptor project.
  *
  * @author Roberto Francescon
  * @brief Encoder header
+ * @version 0.0.1
  */
 
 #ifndef RAPTOR_H
@@ -12,17 +14,16 @@
 #include <iostream>
 #include <cmath>
 
-using namespace std;
-
-class Rcodec{
+class Rcodec
+{
 
  public:
   /**
-   * Constructor for the class Rcodec
+   * Constructor for the Rcodec class
    */
   virtual Rcodec(int arch);
   /**
-   * Destructor for the class Rcodec
+   * Destructor for the Rcodec class
    */
   ~Rcodec();
   /**
@@ -33,15 +34,15 @@ class Rcodec{
    * Method for the decoding of the data
    */
   virtual void decode();
-  
+
  protected:
-  char* filename; //Filename helps to manage details
-  int size_bit; //Maybe useful
-  int size_byte; //Maybe useful
-  int arch; //Necessary to determine the distribution to use
+
+  char* filename; /**< Filename helps to manage details */
+  int size_bit;   /**< Maybe useful */
+  int size_byte;  /**< Maybe useful */
+  int arch;       /**< Necessary to determine the distribution to use */
   
  private:
-
   
 };
 
