@@ -21,7 +21,7 @@ class Rcodec
   /**
    * Constructor for the Rcodec class
    */
-  virtual Rcodec(int arch);
+  Rcodec();
   /**
    * Destructor for the Rcodec class
    */
@@ -29,11 +29,11 @@ class Rcodec
   /**
    * Method for the actual encoding of the data
    */
-  virtual void encode();
+  void encode();
   /**
    * Method for the decoding of the data
    */
-  virtual void decode();
+  void decode();
 
  protected:
 
@@ -41,8 +41,6 @@ class Rcodec
   int size_bit;   /**< Maybe useful */
   int size_byte;  /**< Maybe useful */
   int arch;       /**< Necessary to determine the distribution to use */
-  
- private:
   
 };
 

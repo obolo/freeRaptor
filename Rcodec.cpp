@@ -5,14 +5,12 @@
  * @brief Implementation file of the Rcodec header
  */
 
-Rcodec::Rcodec()
-{}
+#include "Rcodec.h"
 
-Rcodec::~Rcodec()
-{}
+Rcodec::Rcodec(){}
 
-Rcodec::encode()
-{}
+Rcodec::~Rcodec(){}
 
-Rcodec::decode()
-{}
+void Rcodec::encode(){}
+
+void Rcodec::decode(){}
