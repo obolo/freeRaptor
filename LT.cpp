@@ -4,19 +4,29 @@ LTcodes::LTcodes(){}
 
 LTcodes::~LTcodes(){}
 
-Soliton::Soliton(int K)
+void LTcodes::decodeMP(char* enc_block)
 {
-  k = K;
+  //Find the one-neighbor symbols
+  std::vector<int> one_neigh_list;
+  for (int i = 0; i < block_size; i++)
+    {
+
+    }
 }
+
+
+Soliton::Soliton(int K)
+: 
+k(K), 
+_unif_dist(0.0, 1.0),
+_engine(std::chrono::system_clock::now().time_since_epoch().count())
+{}
 
 Soliton::~Soliton(){}
 
 int Soliton::degree()
 {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<float> unif_dist(0, 1);
-  float unif_rand = unif_dist(gen);
-  int val = std::ceil(1./unif_rand);
+  float unif_rand = _unif_dist(_engine);
+  int val = (int)std::ceil(1./unif_rand);
   return (val < k) ?  val : 1;
 }

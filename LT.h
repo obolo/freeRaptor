@@ -18,6 +18,7 @@
 #include <cmath>
 #include <random>
 #include <cmath>
+#include <chrono>
 
 class LTcodes
 {
@@ -30,6 +31,10 @@ class LTcodes
    * Destructor for the LTcodes class
    */
   ~LTcodes();
+  /**
+   * Decode using message passing
+   */
+  void decodeMP(char* enc_block);
 };
 
 class Soliton
@@ -52,6 +57,10 @@ class Soliton
 
   
   int k; /**< Size of the source block: number of source symbols  */
+
+  // protected:
+  std::mt19937 _engine; /**< Seed for the uniform distribution (Mersenne TE)*/
+  std::uniform_real_distribution<double> _unif_dist; /**< Uniform distribution*/
   
 };
 
