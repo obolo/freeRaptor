@@ -4,12 +4,10 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
 // freeRaptor is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-//
 // You should have received a copy of the GNU General Public License
 // along with freeRaptor.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,6 +21,10 @@
 #include <map>
 #include <set>
 
+
+/**
+ * Function to promptly print the element of a vector container
+ */
 void print_vector(std::vector<int> vec)
 {
   for (int i = 0; i < vec.size(); i++)
@@ -32,61 +34,45 @@ void print_vector(std::vector<int> vec)
   std::cout << std::endl;
 }
 
+
+
 int main(int argc, char* argv[])
 {
-  
-  std::cout << "Raptor libraries import test" << std::endl;
-  Soliton soliton_dist (10);
-  Rcodec codec();
-  std::cout << "Number of source pcks (K): " << soliton_dist.k << std::endl;
-  std::cout << "Output of sampling Soliton: " << soliton_dist.degree() << std::endl;
 
-
-  // Test of Soliton sampling
+  char a = 0xa;
+  char b = 0xf;
+  std::cout << "Result of xoring chars: " << 0xa << " and " << 0xb <<" is " <<  0xa^0xb << std::endl;
   
-  // int N_test = 100000;
-  // std::vector<int> collect;
-  // for (int i = 0; i < N_test; i++)
-  //   {
-  //     collect.push_back(soliton_dist.degree());
-  //   }
-  
-  // double dist[soliton_dist.k];
-  // double exp_dist[soliton_dist.k];
-  // for (int k = 1; k <= soliton_dist.k; k++)
-  //   {
-  //     dist[k] = std::count(collect.begin(), collect.end(), k);
-  //     exp_dist[k] = (k == 1) ? 1/(double)soliton_dist.k : 1./((double)k*((double)k-1.));
-  //   }
-  // for (int k = 1; k <= soliton_dist.k; k++)
-  //   {
-  //     std::cout << dist[k]/((double)N_test) << " ";
-  //   }
-  // std::cout << "\n";
-  //   for (int k = 1; k <= soliton_dist.k; k++)
-  //   {
-  //     std::cout << (double)exp_dist[k] << " ";
-  //   }
-  // std::cout << "\n";
-
-  // Test of belief propagation decoder (or greedy decoder)
+  std::cout << "Test algorithm Fountain Code LT" << std::endl;
 
   int K = 6;
   int N = 7;
 
-  EncSymbol enc_symbols[N];
-  DecSymbol dec_symbols[K];
+  std::vector<EncSymbol> enc_symbols;
+  std::vector<DecSymbol> dec_symbols;
 
-  
   // Form an encoded packet
+  for (int n = 0; n < N; n++)
+    {
+      EncSymbol enc_sym;
+      enc_symbols.push_back(enc_sym);
+    }
   enc_symbols[0].value = 1;
   enc_symbols[1].value = 1;
   enc_symbols[2].value = 0;
   enc_symbols[3].value = 1;
   enc_symbols[4].value = 0;
   enc_symbols[5].value = 0;
-  enc_symbols[6].value = 1;  
-
+  enc_symbols[6].value = 1;
+ 
+  // Form a wannabe decoded packet
+  for (int n = 0; n < N; n++)
+    {
+      DecSymbol dec_sym;
+      dec_sym.value = -1;
+      dec_symbols.push_back(dec_sym);
+    }
+  
   // filling up the example
   int settings[N][K];
   settings[0][0] = 2; settings[0][1] = 4;  settings[0][2] = 5;  settings[0][3] = -1; settings[0][4] = -1; settings[0][5] = -1;
@@ -96,6 +82,7 @@ int main(int argc, char* argv[])
   settings[4][0] = 0; settings[4][1] = 5;  settings[4][2] = -1; settings[4][3] = -1; settings[4][4] = -1; settings[4][5] = -1;
   settings[5][0] = 2; settings[5][1] = 5;  settings[5][2] = -1; settings[5][3] = -1; settings[5][4] = -1; settings[5][5] = -1;
   settings[6][0] = 1; settings[6][1] = 3;  settings[6][2] = 4;  settings[6][3] = 5;  settings[6][4] = -1; settings[6][5] = -1;
+
 
   // Generate encoded symbols/packets containers
   for (int i = 0; i < N; i++)
@@ -108,38 +95,30 @@ int main(int argc, char* argv[])
   	    {
   	      enc_symbols[i].neighbors.push_back(settings[i][j]);
   	    }
-  	}
-      
+  	}      
     }
 
-
   
-  // Receiving packets: form  the digraph that will be use in the belief propagation process
+  // Receiving packets: form the digraph that will be use in the belief propagation process
   for (int n = 0; n < N; n++)
     {
-      EncSymbol pck = enc_symbols[n];
-      int n_neigh = pck.neighbors.size();
+      int n_neigh = enc_symbols[n].neighbors.size();
   
       for (int i = 0; i < n_neigh; i++)
-	{
-	  dec_symbols[pck.neighbors[i]].neighbors.push_back(n);
-	}
+      	{
+      	  int n_dec_pck = enc_symbols[n].neighbors[i];
+      	  dec_symbols[n_dec_pck].neighbors.push_back(n);
+      	}
     }
-  //check
-  // for (int k = 0; k < K; k++)
-  //   {
-  //     print_vector(dec_symbols[k].neighbors);
-  //     std::cout << std::endl;
-  //   }
 
-  
   // Belief propagation algorithm
   
   int count = 0;        // check if algo needs to be run again
   bool run_flag = true; // check if algo need to be run again
   int counter = 0;      // just count how many times we run the algo
-  
-  while (run_flag)
+ 
+  //Main loop that implements the belief propagation algorithm (LT codes)
+    while (run_flag)
     {
       // step 1: find encoded symbol of degree 1
       // This cleraly depends of how a symbol is recognized to have 1 neighbor
@@ -167,16 +146,19 @@ int main(int argc, char* argv[])
 	  std::cout << " to node " << enc_symbols[index].neighbors[0] << std::endl;
 
 	  enc_symbols[index].value = -1;
+	  
 	  // handmade search by value (beacuse C++11 apparently is evil)
-	  int ind = 0;
-	  for (int i = 0; i < dec_symbols[enc_symbols[index].neighbors[0]].neighbors.size(); i++)
-	    {
-	      if (dec_symbols[enc_symbols[index].neighbors[0]].neighbors[i] == index)
-		ind = i;
-	    }
+	  int ind = std::find(dec_symbols[enc_symbols[index].neighbors[0]].neighbors.begin(),
+			      dec_symbols[enc_symbols[index].neighbors[0]].neighbors.end(), index)
+	    - dec_symbols[enc_symbols[index].neighbors[0]].neighbors.begin();
+	  // int ind = 0;
+	  // for (int i = 0; i < dec_symbols[enc_symbols[index].neighbors[0]].neighbors.size(); i++)
+	  //   {
+	  //     if (dec_symbols[enc_symbols[index].neighbors[0]].neighbors[i] == index)
+	  // 	ind = i;
+	  //   }
 	  // erase link in the dec_symbol neighbors list
 	  dec_symbols[enc_symbols[index].neighbors[0]].neighbors.erase(dec_symbols[enc_symbols[index].neighbors[0]].neighbors.begin() + ind);
-	  
       
 	  // Step 3: this just decoded symbol have, of course, other neighbors: do a XOR of the
 	  //         newly assigned value with them and erase neighs correspondigly
@@ -185,32 +167,34 @@ int main(int argc, char* argv[])
 	  for (int i = 0; i < n_n; i++)
 	    {
 	      enc_symbols[neighs[i]].value = (int)( (bool)enc_symbols[neighs[i]].value ^ (bool)enc_symbols[index].value ); //XOR
+              // erase links from decoded packet (both at enc_symbols and dec_symbols)
+	      int p_ind = std::find(enc_symbols[neighs[i]].neighbors.begin(), enc_symbols[neighs[i]].neighbors.end(), enc_symbols[index].neighbors[0]) - enc_symbols[neighs[i]].neighbors.begin();
+	      std:: cout << "Looking in enc symbol: " << neighs[i] << " :: ";
+	      print_vector(enc_symbols[neighs[i]].neighbors);
+	      std::cout << "Indexxx: " << p_ind << " Node searching for: "<< enc_symbols[index].neighbors[0] << std::endl;
+	      enc_symbols[neighs[i]].neighbors.erase(enc_symbols[neighs[i]].neighbors.begin() + p_ind);
 	    }
 
 	  // erase link in the enc_symbol neighbors list
-	  enc_symbols_t = EncSymbol enc_symbols[(sizeof(enc_symbols)/sizeof(*enc_symbols))];
-	  for (int i = 0; i < (sizeof(enc_symbols)/sizeof(*enc_symbols)); i++)
-	    {
-	      if (i != index)
-		{
-		  enc_symbols
-		}
-	    }
+	  // std::cout << "Erasing node " << index << std::endl;
+	  // enc_symbols[index].neighbors.erase(enc_symbols[index].neighbors.begin() + 1);
 
+	  
 	  // Step 4: if there are unrecovered symbols, stop: you won! Else, got to Step 1.
 	  count = 0;
 	  for (int n = 0; n < N; n++)
 	    {
-	      if (enc_symbols[n].value == -1)
+	      if (dec_symbols[n].value != -1)
 	       {
 		 count++;
 	       }
 	    }
-	  if (count == N)
+	  if (count == K)
 	    run_flag = false;
 
 	  counter++;
-	  std::cout << "Counter: " << counter << std::endl;
+	  std::cout << "Counts: " << count;
+	  std::cout << " Counter: " << counter << std::endl;
 	}
     }
 
