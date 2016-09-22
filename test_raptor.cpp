@@ -34,12 +34,16 @@ void print_vector(std::vector<int> vec)
 
 int main(int argc, char* argv[])
 {
+<<<<<<< HEAD
   
   std::cout << "Raptor libraries import test" << std::endl;
   Soliton soliton_dist (10);
+=======
+  std::cout << "Test importazione librerie Raptor" << std::endl;
+  Soliton soliton_dist(10);
+>>>>>>> c38989e3b7da3058f7d255fdf66c26313b7413ba
   Rcodec codec();
   std::cout << "Number of source pcks (K): " << soliton_dist.k << std::endl;
-  std::cout << "Output of sampling Soliton: " << soliton_dist.degree() << std::endl;
 
 
   // Test of Soliton sampling
@@ -213,13 +217,19 @@ int main(int argc, char* argv[])
 	  std::cout << "Counter: " << counter << std::endl;
 	}
     }
+<<<<<<< HEAD
 
   // print decoded values
   std::cout << "Decoded symbols: ";
   for (int k = 0; k < K; k++)
+=======
+  std::cout << "Real: ";
+  for (int k = 1; k <= soliton_dist.k; k++)
+>>>>>>> c38989e3b7da3058f7d255fdf66c26313b7413ba
     {
       std::cout << dec_symbols[k].value;
     }
+<<<<<<< HEAD
   std::cout << std::endl;
 
   // print received encoded symbols to check if they were properly processed
@@ -227,7 +237,30 @@ int main(int argc, char* argv[])
   for (int n = 0; n < N; n++)
     {
       std::cout << enc_symbols[n].value;
+=======
+  std::cout << "\nExp:  ";
+    for (int k = 1; k <= soliton_dist.k; k++)
+    {
+      std::cout << (double)exp_dist[k] << " ";
+      if (k == 1 || k == 2)
+	std::cout << "    ";
+>>>>>>> c38989e3b7da3058f7d255fdf66c26313b7413ba
     }
   std::cout << std::endl;
   
+  std::cout << "Trying out xoring chars" << std::endl;
+  unsigned char a[8];
+  unsigned char b[8];
+  unsigned char p[8];
+
+  for(int i = 0; i < 8; ++i)
+    {
+      p[i] = a[i] ^ b[i];
+    }
+
+  for (int i=0; i < 8; ++i)
+    {
+      std::cout << p[i] << " ";
+    }
+  std::cout << "\n";
 }
