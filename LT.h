@@ -1,5 +1,6 @@
 // Copyright 2016 Roberto Francescon
 // This file is part of freeRaptor.
+//
 // freeRaptor is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -8,6 +9,7 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+//
 // You should have received a copy of the GNU General Public License
 // along with freeRaptor.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -30,6 +32,8 @@
 #include <random>
 #include <cmath>
 #include <chrono>
+#include <math.h>
+#include <vector>
 
 class LTcodes
 {
@@ -55,7 +59,7 @@ class Soliton
    * Constructor of the Soliton distribution class. Initilizes a Soliton
    * distribution.
    */
-  Soliton(int K);
+  Soliton(int K, double delta_, double c);
   /**
    * Destructor of the Soliton distribution class.
    */
@@ -65,11 +69,33 @@ class Soliton
    * distribution.
    */
   int degree();
-
+  /**
+   * Function that initialize the Soliton distribution values
+   */
+  void initialize();
+  /**
+   * Function that computer the parameter R from c
+   */
+  void computeR(double c);
+  /**
+   * Function that computes the Cumulative Distribution Function from the 
+   * Probability Density Function
+   */
+  void computeCDF();
+  /**
+   * Function to print out the PDF of the RSD
+   */
+  const std::vector<double> getPDF() const;
   
-  int k; /**< Size of the source block: number of source symbols  */
+ protected:
+  int k;         /**< Size of the source block: number of source symbols  */
+  double R;      /** Parameter of the Robust Soliton*/
+  double delta_; /** Failure probability*/
+  double c;      /** Second spike position parameter */
+  std::vector<double> pdf;   /** Probability Density Function */
+  std::vector<double> cdf;   /** Cumulative Distribution Function */
 
-  // protected:
+protected:
   std::mt19937 _engine; /**< Seed for the uniform distribution (Mersenne TE)*/
   std::uniform_real_distribution<double> _unif_dist; /**< Uniform distribution*/
   
