@@ -39,109 +39,71 @@ void print_vector(std::vector<int> vec)
 int main(int argc, char* argv[])
 {
 
-  std::cout << "Importing LT libraries test" << std::endl;
-
-  const int K = 16; // input symbols
-
-  const int N = 10000; // Number of random samples
-  std::vector<int> collect; // Holdin' the values
-  double dist[K]; // Holdin' tha histo of samples
-  double exp_dist[K]; // Holdin' tha histo as thoery
-
-  Soliton distribution(K, 0.01, 0.1);
-
-
-  // ------------- Test of the Soliton distribution ----------------------
-  // Sample the distribution
-  for (int n = 0; n < N; n++)
-    {
-      collect.push_back(distribution.degree());
-    }
-
-  // Make the histogram
-  for(int k = 0; k < K; k++)
-    {
-      dist[k] = std::count(collect.begin(), collect.end(), k);
-      exp_dist[k] = (k == 1) ? 1/(double)K : 1./((double)k*((double)k-1.));
-    }
-
-  // Print the histograms
-  std::cout << "Real:   ";
-  for (int k = 1; k <= K; k++)
-    {
-      std::cout << dist[k]/((double)N) << " ";
-    }
-  std::cout << "\n";
-  std::cout << "Expect: ";
-  for (int k = 1; k <= K; k++)
-    {
-      std::cout << (double)exp_dist[k] << " ";
-    }
-  std::cout << "\n";
+  std::cout << "\nImporting LT libraries test" << std::endl;
 
   //-------------------- Test of the Robust Soliton distribution --------------------
 
   // Compute R
-  double c = 0.1;
-  int k = 16;
-  double delta_ = 0.01;
+  double c = 0.03;
+  int k = 128;
+  double delta_ = 0.5;
   double R = c*log(k / delta_) * sqrt(k);
 
-  std::vector<double> pdf;
+  Soliton distribution1(k, delta_, c);
+  
+  std::vector<double> pdf; // Probability Density Function
+  std::vector<double> cdf; // Cumulative Distribution Function
 
-  std::cout << "Value of R is: " << R << std::endl;
+  // Generate PDF with the class method and print it
+  
+  distribution1.initialize(); // Basivally compute PDF
+  
+  std::vector<double> pdf1 = distribution1.getPDF();
+  std::cout << "\nRobust Soliton Distribution:" << std::endl;
+  for (int i = 0; i < k; i++)
+    {
+      std::cout << pdf1[i] << ",";
+    }
+  std::cout << std::endl;
 
-  // Generation of the rho variable
-  double rho[k];
-  rho[0] = 1;
-  for (int i = 2; i < k; i++)
+  // Generate and print class generated CDF for the RSoliton
+  
+  distribution1.computeCDF(); // Of course, compute CDF
+  
+  std::cout << "\nCumulative distribution Function of the Robust Soliton:" << std::endl;
+  std::vector<double> cdf1 = distribution1.getCDF();
+  for (int i = 0; i < cdf1.size(); i++)
     {
-      rho[i-1] = 1/((double)i*(i-1));
+      std::cout << cdf1[i] << ",";
     }
-  // Generation of the tau variable
-  double tau[k];
-  for (int i = 1; i <= int(k/R) - 1; i++)
-    {
-      tau[i-1] = R/((double)i*k);
-    }
-  for (int i = int(k/R) + 1; i <= k; i++)
-    {
-      tau[i-1] = 0;
-    }
-  tau[int(k/R)-1] = R*(log(R/delta_)/k);
+  std::cout << std::endl;
 
-  // Sum everything to normalize
-  double beta = 0;
+  // Test drawing from the Robust Soliton
+
+  const int N = 10000; // Number of random samples
+  std::vector<int> collect; // Holdin' the values
+  double dist[k]; // Holdin the distribution
+  
+  // Sample the distribution
+  for (int n = 0; n < N; n++)
+    {
+      collect.push_back(distribution1.degree());
+    }
+  std::cout << std::endl;
+  std::cout << "A sample: " << distribution1.degree() << std::endl;
+
+  // Make the histogram
   for(int i = 0; i < k; i++)
     {
-      beta = beta + tau[i] + rho[i];
+      dist[i] = std::count(collect.begin(), collect.end(), i);
     }
 
-  std::cout << "Beta is: " << beta << std::endl;
-  double mi[k];
-  for (int i = 0; i < k; i++)
+  // Print the histograms
+  std::cout << "\nHistogram of sampling: " << N << " times" << std::endl;
+  for (int i = 0; i <= k; i++)
     {
-      mi[i] = (rho[i] + tau[i])/beta;
+      std::cout << dist[i]/((double)N) << ",";
     }
-
-  // Print the result
-  std::cout << "Printing mi:" << std::endl;
-  for (int i = 0; i < k; i++)
-    {
-      pdf.push_back(mi[i]);
-      std::cout << mi[i] << "  ";
-    }
-  std::cout << std::endl;
-  std::cout << "Second peak at: " << (int)(k/R) << std::endl;
-
-  // Generate PDF with the class method
-  distribution.initialize();
-  std::vector<double> pdf1 = distribution.getPDF();
-
-  for (int i = 0; i < k; i++)
-    {
-      std::cout << pdf1[i] << "  ";
-    }
-  std::cout << std::endl;
+  std::cout << "\n";
 
 }

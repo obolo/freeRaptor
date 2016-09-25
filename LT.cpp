@@ -32,9 +32,14 @@ Soliton::~Soliton(){}
 
 int Soliton::degree()
 {
-  float unif_rand = _unif_dist(_engine);
-  int val = (int)std::ceil(1./unif_rand);
-  return (val < k) ?  val : 1;
+  //float unif_rand = _unif_dist(_engine);
+  //int val = (int)std::ceil(1./unif_rand);
+  //return (val < k) ?  val : 1;
+  std::default_random_engine generator;
+  std::discrete_distribution<int> distribution(pdf.begin(), pdf.end());
+
+  return distribution(_engine);
+  
 }
 
 void Soliton::initialize()
@@ -91,4 +96,9 @@ void Soliton::computeCDF()
 const std::vector<double> Soliton::getPDF() const
 {
   return pdf;
+}
+
+const std::vector<double> Soliton::getCDF() const
+{
+  return cdf;
 }

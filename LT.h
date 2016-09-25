@@ -46,10 +46,14 @@ class LTcodes
    * Destructor for the LTcodes class
    */
   ~LTcodes();
-  /**
-   * Decode using message passing
+    /**
+   * Encode using the Robust Soliton
    */
-  void decodeMP(char* enc_block);
+  void encode();
+  /**
+   * Decode using Belief Propagation
+   */
+  void decode();
 };
 
 class Soliton
@@ -83,9 +87,13 @@ class Soliton
    */
   void computeCDF();
   /**
-   * Function to print out the PDF of the RSD
+   * Function to print out the PDF of the Robust Soliton
    */
   const std::vector<double> getPDF() const;
+    /**
+   * Function to print out the CDF of the Robust Soliton
+   */
+  const std::vector<double> getCDF() const;
   
  protected:
   int k;         /**< Size of the source block: number of source symbols  */
