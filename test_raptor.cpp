@@ -14,7 +14,7 @@
 // along with freeRaptor.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LT.h"
-#include "Rcodec.h"
+//#include "Rcodec.h"
 #include <iostream>
 #include <stdlib.h>
 #include <array>
@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <fstream>
+#include <bitset>
 
 /**
  * Function for promptly printing vectors of int
@@ -93,9 +95,9 @@ int main(int argc, char* argv[])
   std::cout << "A sample: " << distribution1.degree() << std::endl;
 
   // Make the histogram
-  for(int i = 0; i < k; i++)
+  for(int i = 1; i < k; i++)
     {
-      dist[i] = std::count(collect.begin(), collect.end(), i);
+      dist[i-1] = std::count(collect.begin(), collect.end(), i);
     }
 
   // Print the histograms
@@ -105,5 +107,34 @@ int main(int argc, char* argv[])
       std::cout << dist[i]/((double)N) << ",";
     }
   std::cout << "\n";
+
+  // Test the input symbols chooser
+  int degg = distribution1.degree();
+  std::vector<int> in_symbols;
+  in_symbols = distribution1.select_symbols(degg);
+  std::cout << "Here slected " << degg << " symbols: ";
+  print_vector(in_symbols);
+
+  // Test reading a file bit by bit
+  std::string filename("text.txt");
+  std::ifstream filestream(filename, std::ifstream::binary);
+  //std::cout << "Bit representation: " << std::hex << filestream << std::endl;
+  filestream.seekg(0, filestream.end);
+  int length = filestream.tellg();
+  char* buffer = new char[length];
+  std::cout << "Length of file is: " << length << std::endl;
+  filestream.seekg(0, filestream.beg);
+  filestream.read(buffer, length);
+  std::cout << std::bitset<32>(buffer[8]);
+  std::cout << std::endl;
+
+  // Test the XORing of chars
+  char char1 = buffer[3];
+  char char2 = buffer[8];
+  std::cout << "First char:  " << std::bitset<8>(char1) << std::endl;
+  std::cout << "Second char: " << std::bitset<8>(char2) << std::endl;
+  char out_symbol;
+  out_symbol = char1 ^ char2;
+  std::cout << "Result char: " << std::bitset<8>(out_symbol) << std::endl;
 
 }

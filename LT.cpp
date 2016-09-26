@@ -15,17 +15,14 @@
 
 #include "LT.h"
 
-LTcodes::LTcodes(){}
-
-LTcodes::~LTcodes(){}
 
 Soliton::Soliton(int K, double delta_, double c_)
-: 
-k(K), 
-_unif_dist(0.0, 1.0),
-delta_(delta_),
-c(c_),
-_engine(std::chrono::system_clock::now().time_since_epoch().count())
+  : 
+  k(K), 
+  //_unif_dist(0.0, 1.0),
+  delta_(delta_),
+  c(c_),
+  _engine(std::chrono::system_clock::now().time_since_epoch().count())
 {}
 
 Soliton::~Soliton(){}
@@ -38,7 +35,7 @@ int Soliton::degree()
   std::default_random_engine generator;
   std::discrete_distribution<int> distribution(pdf.begin(), pdf.end());
 
-  return distribution(_engine);
+  return distribution(_engine)+1;
   
 }
 
@@ -101,4 +98,68 @@ const std::vector<double> Soliton::getPDF() const
 const std::vector<double> Soliton::getCDF() const
 {
   return cdf;
+}
+
+std::vector<int> Soliton::select_symbols(int deg)
+{
+  std::vector<int> selected;
+  std::vector<int> numbers;
+  for (int i = 1; i <= k; i++)
+    {
+      numbers.push_back(i);
+    }
+
+  for (int i = 0; i < deg; i++)
+    {
+      std::uniform_int_distribution<int> distribution(0,numbers.size()-1);
+      int select = distribution(_engine);
+      selected.push_back(numbers[select]);
+      numbers.erase(numbers.begin()+select);
+    }
+  return selected;
+}
+
+
+LTcodes::LTcodes(int K, double delta_, double c_)
+  :
+  distribution(Soliton(K, delta_, c_)),
+  filename("")
+{}
+
+LTcodes::~LTcodes(){}
+
+void LTcodes::set_filename(std::string fname)
+{
+  filename = fname;
+}
+
+EncSymbol LTcodes::encode_symbol()
+{
+  EncSymbol out_symbol;
+  int deg = distribution.degree();
+  std::vector<int> neighbors = distribution.select_symbols(deg);
+  char* data = buffer_data();
+  char out_char = data[neighbors[0]];
+  for (int i = 1; i < neighbors.size(); i++)
+    {
+      out_char = out_char ^ data[neighbors[i]];
+    }
+  out_symbol.data = out_char;
+  out_symbol.neighbors = neighbors;
+}
+
+char* LTcodes::buffer_data()
+{
+  if(!filename.empty())
+    {
+      std::ifstream filestream(filename, std::ifstream::binary);
+      filestream.seekg(0, filestream.end);
+      int length = filestream.tellg();
+      char* buffer = new char[length];
+      filestream.seekg(0, filestream.beg);
+      filestream.read(buffer, length);
+      return buffer;
+    }
+  else
+    std::cerr << "No file to buffer: please check provided filename" << std::endl;
 }

@@ -27,6 +27,8 @@
 #ifndef LT_H
 #define LT_H
 
+#include <string>
+#include <fstream>
 #include <iostream>
 #include <cmath>
 #include <random>
@@ -35,25 +37,14 @@
 #include <math.h>
 #include <vector>
 
-class LTcodes
+
+class EncSymbol
 {
- public:
-  /**
-   * Constructor for the LTcodes class
-   */
-  LTcodes();
-  /**
-   * Destructor for the LTcodes class
-   */
-  ~LTcodes();
-    /**
-   * Encode using the Robust Soliton
-   */
-  void encode();
-  /**
-   * Decode using Belief Propagation
-   */
-  void decode();
+
+public:
+  std::vector<int> neighbors;
+  char data;
+  
 };
 
 class Soliton
@@ -94,6 +85,11 @@ class Soliton
    * Function to print out the CDF of the Robust Soliton
    */
   const std::vector<double> getCDF() const;
+  /**
+   * Function that computes the vector of symbols to be
+   * selected for encoding the current output symbol
+   */
+  std::vector<int> select_symbols(int deg);
   
  protected:
   int k;         /**< Size of the source block: number of source symbols  */
@@ -107,6 +103,41 @@ protected:
   std::mt19937 _engine; /**< Seed for the uniform distribution (Mersenne TE)*/
   std::uniform_real_distribution<double> _unif_dist; /**< Uniform distribution*/
   
+};
+
+class LTcodes
+{
+ public:
+  /**
+   * Constructor for the LTcodes class
+   */
+  LTcodes(int K, double delta_, double c_);
+  /**
+   * Destructor for the LTcodes class
+   */
+  ~LTcodes();
+    /**
+   * Encode using the Robust Soliton Distribution
+   */
+  EncSymbol encode_symbol();
+  /**
+   * Decode using Belief Propagation
+   */
+  void decode_symbol();
+  /**
+   * Method that assigns the filename for encoding
+   */
+  void set_filename(std::string fname);
+  /**
+   * Method to buffer a file to be encoded
+   */
+  char* buffer_data();
+
+ protected:
+
+  Soliton distribution; /** Robust Soliton Distribution object */
+  std::string filename; /** Filename of the file under encoding process */
+
 };
 
 #endif
