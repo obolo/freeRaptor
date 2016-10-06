@@ -81,7 +81,7 @@ class Soliton
    * Function to print out the PDF of the Robust Soliton
    */
   const std::vector<double> getPDF() const;
-    /**
+  /**
    * Function to print out the CDF of the Robust Soliton
    */
   const std::vector<double> getCDF() const;
@@ -121,15 +121,15 @@ class LTcodes
    */
   EncSymbol encode_symbol();
   /**
-   * Decode using Belief Propagation
+   * Decode using Belief Propagation: if unsuccessful return -1
    */
-  void decode_symbol();
+  char* decode_packet(EncSymbol enc_sym);
   /**
    * Method that assigns the filename for encoding
    */
   void set_filename(std::string fname);
   /**
-   * Method to buffer a file to be encoded
+   * Method to buffer a file to be encoded, given by filename
    */
   char* buffer_data();
 

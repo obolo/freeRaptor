@@ -17,8 +17,8 @@
 
 
 Soliton::Soliton(int K, double delta_, double c_)
-  : 
-  k(K), 
+  :
+  k(K),
   //_unif_dist(0.0, 1.0),
   delta_(delta_),
   c(c_),
@@ -36,7 +36,7 @@ int Soliton::degree()
   std::discrete_distribution<int> distribution(pdf.begin(), pdf.end());
 
   return distribution(_engine)+1;
-  
+
 }
 
 void Soliton::initialize()
@@ -130,6 +130,7 @@ LTcodes::~LTcodes(){}
 
 void LTcodes::set_filename(std::string fname)
 {
+  // should put a check on the existence of the file
   filename = fname;
 }
 
@@ -150,16 +151,101 @@ EncSymbol LTcodes::encode_symbol()
 
 char* LTcodes::buffer_data()
 {
+
+  char* buffer;
   if(!filename.empty())
     {
       std::ifstream filestream(filename, std::ifstream::binary);
       filestream.seekg(0, filestream.end);
       int length = filestream.tellg();
-      char* buffer = new char[length];
+      buffer = new char[length];
       filestream.seekg(0, filestream.beg);
       filestream.read(buffer, length);
-      return buffer;
     }
   else
     std::cerr << "No file to buffer: please check provided filename" << std::endl;
+  return buffer;
+}
+
+// TBD: PORT BELIEF PROPAGATION TO THE LIBRARIES
+char* LTcodes::decode_packet(EncSymbol enc_sym)
+{
+  char* enc_data = enc_sym.data;
+  std::vector<int> neighbors = enc_sym.neighbors;
+
+  int count = 0;        // check if algo needs to be run again
+  bool run_flag = true; // check if algo need to be run again
+  int counter = 0;      // just count how many times we run the algo
+
+  //Main loop that implements the belief propagation algorithm (LT codes)
+  while (run_flag)
+    {
+      // step 1: find encoded symbol of degree 1
+      // This cleraly depends of how a symbol is recognized to have 1 neighbor
+      bool flag = false;
+      int index;
+      for (int i = 0; i < N; i++)
+	{
+	  if (enc_symbols[i].neighbors.size() == 1 && enc_symbols[i].value != -1)
+	    {
+	      flag = true;
+	      index = i;
+	    }
+	}
+      if (flag == false)
+	{
+	  std::cout << "Failed: no one-neighbor node found and undecoded symbols left" << std::endl;
+	  return 1;
+	}
+      else //true
+	{
+
+	  // Step 2: decode the unique neighbor of this symbol with the value of the encoded symbol itself
+	  dec_symbols[enc_symbols[index].neighbors[0]].value = enc_symbols[index].value;
+	  std::cout << "Assigned value: " << dec_symbols[enc_symbols[index].neighbors[0]].value;
+	  std::cout << " to node " << enc_symbols[index].neighbors[0] << std::endl;
+
+	  enc_symbols[index].value = -1;
+
+	  // handmade search by value (beacuse C++11 apparently is evil)
+	  int ind = std::find(dec_symbols[enc_symbols[index].neighbors[0]].neighbors.begin(),
+			      dec_symbols[enc_symbols[index].neighbors[0]].neighbors.end(), index)
+	    - dec_symbols[enc_symbols[index].neighbors[0]].neighbors.begin();
+
+	  // erase link in the dec_symbol neighbors list
+	  dec_symbols[enc_symbols[index].neighbors[0]].neighbors.erase(dec_symbols[enc_symbols[index].neighbors[0]].neighbors.begin() + ind);
+
+	  // Step 3: this just decoded symbol have, of course, other neighbors: do a XOR of the
+	  //         newly assigned value with them and erase neighs correspondigly
+	  std::vector<int> neighs = dec_symbols[enc_symbols[index].neighbors[0]].neighbors;
+	  int n_n = neighs.size();
+	  for (int i = 0; i < n_n; i++)
+	    {
+	      enc_symbols[neighs[i]].value = (int)( (bool)enc_symbols[neighs[i]].value ^ (bool)enc_symbols[index].value ); //XOR
+              // erase links from decoded packet (both at enc_symbols and dec_symbols)
+	      int p_ind = std::find(enc_symbols[neighs[i]].neighbors.begin(), enc_symbols[neighs[i]].neighbors.end(), enc_symbols[index].neighbors[0]) - enc_symbols[neighs[i]].neighbors.begin();
+	      std:: cout << "Looking in enc symbol: " << neighs[i] << " :: ";
+	      print_vector(enc_symbols[neighs[i]].neighbors);
+	      std::cout << "Indexxx: " << p_ind << " Node searching for: "<< enc_symbols[index].neighbors[0] << std::endl;
+	      enc_symbols[neighs[i]].neighbors.erase(enc_symbols[neighs[i]].neighbors.begin() + p_ind);
+	    }
+
+
+	  // Step 4: if there are unrecovered symbols, stop: you won! Else, got to Step 1.
+	  count = 0;
+	  for (int n = 0; n < N; n++)
+	    {
+	      if (dec_symbols[n].value != -1)
+		{
+		  count++;
+		}
+	    }
+	  if (count == K)
+	    run_flag = false;
+
+	  counter++;
+	  std::cout << "Counts: " << count;
+	  std::cout << " Counter: " << counter << std::endl;
+	}
+    }
 }

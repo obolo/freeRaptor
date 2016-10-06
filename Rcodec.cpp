@@ -25,6 +25,17 @@ Rcodec::Rcodec(){}
 
 Rcodec::~Rcodec(){}
 
-void Rcodec::encode(){}
+void Rcodec::encode()
+{
+
+  distribution.initialize(); // Basically compute PDF
+
+  for (int k = 0; k < K; k++) // loop over the input symbols
+    {
+      int d = distribution.degree();
+      // method to uniformly choose d input symbols
+      // XOR over the input symbols
+    }
+}
 
 void Rcodec::decode(){}

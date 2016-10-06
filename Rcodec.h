@@ -22,9 +22,10 @@
  * @file    Rcodec.h
  */
 
-#ifndef RAPTOR_H
-#define RAPTOR_H
+#ifndef RCODEC_H
+#define RCODEC_H
 
+#include <LT.h>
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -49,13 +50,16 @@ class Rcodec
    * Method for the decoding of the data
    */
   void decode();
-
+  
  protected:
-
+  
   char* filename; /**< Filename helps to manage details */
   int size_bit;   /**< Maybe useful */
   int size_byte;  /**< Maybe useful */
   int arch;       /**< Necessary to determine the distribution to use */
+  std::vector<int>  in_packet;
+  std::vector<int> out_packet;
+  Soliton distribution(k, delta_, c); /** Main responsible */
   
 };
 
