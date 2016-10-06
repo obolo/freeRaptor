@@ -28,6 +28,7 @@
 #include <iostream>
 #include <array>
 #include <bitset>
+#include <algorithm>
 
 
 // Definitions:
@@ -54,7 +55,7 @@ class RaptorEncoder
    * @param Gmax integer maximum number of symbols within an encoding group (default 10)
    */
   RaptorEncoder(uint64_t F, uint8_t W, uint64_t P, uint8_t Al,
-		uint8_t Kmax, uint8_t Kmin, uint8_t Gmax);
+		uint16_t Kmax, uint16_t Kmin, uint8_t Gmax);
   /**
    * Destructor for the RaptorEncoder class
    */
@@ -76,7 +77,7 @@ class RaptorEncoder
    * Method used for obtaining the size H for the
    * Half symbols.
    */
-  int getH(int K);
+  int getH(int K, int S);
   /**
    * Method to obtain the S LDPC intermediate symbols
    * @param S integer nuumber of LDPC intermediate symbols to generate
@@ -88,7 +89,7 @@ class RaptorEncoder
    * @param H integer nuumber of Half intermediate symbols to generate
    * @param C char pointer to the K first intermediate symbols
    */
-  uint8_t* getHalfSymbols(int S, char* C);
+  uint8_t* getHalfSymbols(int H, int S, char* C);
   /**
    * Method for building the Constraint Matrix.
    * This is the main block used for the encoding process.

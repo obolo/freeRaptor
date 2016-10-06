@@ -43,10 +43,10 @@ std::array<int, 4> partition(uint8_t I, uint8_t J)
   uint8_t IL = ceil(I/J);
   uint8_t IS = floor(I/J);
   uint8_t JL = I - (IS * J);
-  uint8_t JL = J - JL;
+  uint8_t JS = J - JL;
 
   std::array<int, 4> result;
-  result[0] = IL; result[1] = IS; result[2] = JL; resut[3] = JS;
+  result[0] = IL; result[1] = IS; result[2] = JL; result[3] = JS;
 
   return result;
 }
@@ -128,18 +128,18 @@ std::array<int, 3> trip(uint8_t K, uint8_t i)
 }
 
 RaptorEncoder::RaptorEncoder(uint64_t F, uint8_t W, uint64_t P, uint8_t Al=4,
-			     uint8_t Kmax=8192, uint8_t Kmin=1024, uint8_t Gmax=10)
+			     uint16_t Kmax=8192, uint16_t Kmin=1024, uint8_t Gmax=10)
 {
 
   // Pointers to data
 
-  uint8_t* C_ = new[K](); // The K source symbols
-  uint8_t*  C = new[L](); // The L intermediate symbols
-  uint8_t** A = new[][]
+  uint8_t* C_ = new uint8_t[K](); // The K source symbols
+  uint8_t*  C = new uint8_t[L](); // The L intermediate symbols
+  uint8_t** A; // encoding matrix
 
   // Derive parameters
 
-  uint64_t G = min(ceil(P*Kmin/F), P/Al, Gmax);
+  uint64_t G = std::min(ceil(P*Kmin/F), std::min(P/Al, Gmax));
 
   T = floor(P/(Al*G))*Al; 
 
@@ -147,7 +147,7 @@ RaptorEncoder::RaptorEncoder(uint64_t F, uint8_t W, uint64_t P, uint8_t Al=4,
 
   Z = ceil(Kt/Kmax);
 
-  N = min( ceil(ceil(Kt/Z)*T/W), T/Al );
+  N = std::min( ceil(ceil(Kt/Z)*T/W), T/Al );
 
   // Partitioning and sub-partitioning  the blocks and the symbols
 
@@ -213,75 +213,75 @@ int RaptorEncoder::getH(int K, int S)
 
 uint8_t* RaptorEncoder::getLDPCSymbols(int S, uint8_t* C)
 {
-  uint8_t* symbols = new uint8_t[S]();
-  uint8_t a;
-  uint8_t b;
+  // uint8_t* symbols = new uint8_t[S]();
+  // uint8_t a;
+  // uint8_t b;
   
-  for (int i = 0; i < K; i++)
-    {
-      a = 1 + ( floor((i/S) % (S - 1)) );
-      b = i % S;
-      C[K + b] = C[K + b] ^ C[i];
-      b = (b + a) % S;
-      C[K + b] = C[K + b] ^ C[i];
-      b = (b + a) % S;
-      C[K + b] = C[K + b] ^ C[i];
-    }
+  // for (int i = 0; i < K; i++)
+  //   {
+  //     a = 1 + ( floor((i/S) % (S - 1)) );
+  //     b = i % S;
+  //     C[K + b] = C[K + b] ^ C[i];
+  //     b = (b + a) % S;
+  //     C[K + b] = C[K + b] ^ C[i];
+  //     b = (b + a) % S;
+  //     C[K + b] = C[K + b] ^ C[i];
+  //   }
   
 }
 
 uint8_t* RaptorEncoder::getHalfSymbols(int H, int S, uint8_t* C)
 {
 
-  // Find H prime which I called H_
-  int H_ = ceil((double)H/2);
-  // Build the table cotaining the Gray words of weight H_
-  uint32_t* m = collect_m(H_, K+S);
+  // // Find H prime which I called H_
+  // int H_ = ceil((double)H/2);
+  // // Build the table cotaining the Gray words of weight H_
+  // uint32_t* m = collect_m(H_, K+S);
   
-  // main loop for building the Half Symbols
-  int i = 0;
-  for (int h = 0; h < H;  h++)
-    {
-      for (int j = 0; j < K + S; j++)
-	{ 
-	  word = std::bitset<32>(m[j]);
-	  if ((bool)(word >> h) & 1))
-	    C[h+K+S] = C[h+K+S] ^ C[j];
-	}
-    }
+  // // main loop for building the Half Symbols
+  // int i = 0;
+  // for (int h = 0; h < H;  h++)
+  //   {
+  //     for (int j = 0; j < K + S; j++)
+  // 	{ 
+  // 	  word = std::bitset<32>(m[j]);
+  // 	  if ((bool)(word >> h) & 1))
+  // 	    C[h+K+S] = C[h+K+S] ^ C[j];
+  // 	}
+  //   }
 }
 
 
 uint8_t* constraintMatrix(int K, int S, int H)
 {
-  uint8_t* A = new uint8_t[K+S+H][K+S+H]();
+  uint8_t* A[K+S+H][K+S+H];
 
-  // Build the first part: LDPC part
-  // S rows / K + S + H columns
-  // Elaborate on the first ceil(K/S) circulant submatrices
-  for (int i = 0; i < ceil(K/S); i++)
-    {
-      for(int c = 0; c < S; c++)
-	{
-	  A[          0 + c][S+c] = 1;
-	  A[(  i+1) % S + c][S+c] = 1;
-	  A[(2*i+1) % S + c][S+c] = 1;
-	}
-    }
+  // // Build the first part: LDPC part
+  // // S rows / K + S + H columns
+  // // Elaborate on the first ceil(K/S) circulant submatrices
+  // for (int i = 0; i < ceil(K/S); i++)
+  //   {
+  //     for(int c = 0; c < S; c++)
+  // 	{
+  // 	  A[          0 + c][S+c] = 1;
+  // 	  A[(  i+1) % S + c][S+c] = 1;
+  // 	  A[(2*i+1) % S + c][S+c] = 1;
+  // 	}
+  //   }
 
-  // SxS identity matrix
-  uint8_t* I_S = new uint8_t[S][S]();
-  for (int i = 0; i < S; i++)
-    {
-      I_S[i][i] = 1;
-    }
+  // // SxS identity matrix
+  // uint8_t* I_S[S][S];
+  // for (int i = 0; i < S; i++)
+  //   {
+  //     I_S[i][i] = 1;
+  //   }
 
-  // HxH identity matrix
-  uint8_t* I_H = new uint8_t[H][H]();
-  for (int i = 0; i < S; i++)
-    {
-      I_H[i][i] = 1;
-    }
+  // // HxH identity matrix
+  // uint8_t* I_H = new uint8_t[H][H]();
+  // for (int i = 0; i < S; i++)
+  //   {
+  //     I_H[i][i] = 1;
+  //   }
   
 }
 

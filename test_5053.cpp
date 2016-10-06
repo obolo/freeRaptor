@@ -5,7 +5,7 @@
 #include <math.h>
 #include <cinttypes>
 #include <bitset>
-#include <gsl/gsl_sf_bessel.h>
+//#include <gsl/gsl_sf_bessel.h>
 
 int choose(int n, int k)
 {
@@ -120,32 +120,32 @@ uint32_t* collect_m(int k, int N)
   return m;
 }
 
-int main(int argc, char* arcv[])
+int main(int argc, char* argv[])
 {
   int S = 10;
   std::cout << "This is a fucking library importation test." << std::endl;
-  uint8_t* symbols = new uint8_t[S]();
-  symbols[0] = 6;
-  symbols[9] = 6;
-  for (int i = 0; i < S; i++)
-    {
-      std::cout << std::hex << symbols[i] << ",";
-    }
-  std::cout << std::endl;
+  // uint8_t* symbols = new uint8_t[S]();
+  // symbols[0] = 6;
+  // symbols[9] = 6;
+  // for (int i = 0; i < S; i++)
+  //   {
+  //     std::cout << std::hex << symbols[i] << ",";
+  //   }
+  // std::cout << std::endl;
   int K = 256;
   //double c_ = sqrt(2*K);
   //uint8_t c  = (uint8_t)(sqrt(2*K));
   //std::printf("Here you have the number: %f \n", c_);
   //std::printf("Here you have the number: %+" PRIu8 "\n", c);
-  int X = (int)(sqrt(2*K));
-  bool run = true;
-  while(run)
-    {
-      if (X * (X - 1) >= 2*K)
-	run = false;
-      else
-	X = X + 1;	  
-    }
+  // int X = (int)(sqrt(2*K));
+  // bool run = true;
+  // while(run)
+  //   {
+  //     if (X * (X - 1) >= 2*K)
+  // 	run = false;
+  //     else
+  // 	X = X + 1;	  
+  //   }
   // int S_ = (int)(ceil(0.01*K) + X);
   // std::cout << std::dec << "X is equal to " << X << " and S is " << S_ << std::endl;
   // int n = 6;
@@ -163,24 +163,27 @@ int main(int argc, char* arcv[])
     {
       std::cout << m[n] << " " << std::bitset<32>(m[n]) << std::endl;
     }
-  int S_ = getS(10);
-  std::cout << std::dec << "For K=10 S is " << S_ << std::endl;
-  int H = getH(10, S_);
-  std::cout << std::dec << "For K=10 H is " << H << std::endl;
+  int K_ = 10;
+  int S_ = getS(K_);
+  std::cout << std::dec << "For K="<< K_ << "S is " << S_ << std::endl;
+  int H = getH(K_, S_);
+  std::cout << std::dec << "For K="<< K_ << " H is " << H << std::endl;
 
-  uint8_t** A = new uint8_t[S_][10];
+  //  uint8_t** A = new uint8_t[S_][10];
+  uint8_t A[S_][10];
 
   // Build the first part: LDPC part
   // S rows / K + S + H columns
   // Elaborate on the first ceil(K/S) circulant submatrices
-  for (int i = 0; i < ceil(K/S); i++)
-    {
-      for(int c = 0; c < S; c++)
-	{
-	  A[          0 + c][S+c] = 1;
-	  A[(  i+1) % S + c][S+c] = 1;
-	  A[(2*i+1) % S + c][S+c] = 1;
-	}
-    }
-  
+  // for (int i = 0; i < ceil(K/S); i++)
+  //   {
+  //     for(int c = 0; c < S; c++)
+  // 	{
+  // 	  A[          0 + c][S+c] = 1;
+  // 	  A[(  i+1) % S + c][S+c] = 1;
+  // 	  A[(2*i+1) % S + c][S+c] = 1;
+  // 	}
+  //   }
+  //Test RaptorEncoder object generator
+  RaptorEncoder enc(1024, 8, 1024);   
 }
