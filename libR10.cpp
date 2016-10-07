@@ -105,7 +105,8 @@ R10Encoder::R10Encoder(uint8_t K_, uint64_t F_, uint8_t W_, uint64_t P_, uint8_t
   W(W_),
   P(P_),
   S(0),
-  H(0)
+  H(0),
+  T(8)
 {
   setS();
   setH();
@@ -134,7 +135,6 @@ R10Encoder::R10Encoder(uint8_t K_, uint64_t F_, uint8_t W_, uint64_t P_, uint8_t
 	}
     }
 }
-
 
 R10Encoder::~R10Encoder(){}
 
@@ -247,7 +247,7 @@ uint32_t R10Encoder::rand(uint16_t X, uint16_t i, uint16_t m)
   return ( (uint32_t)V0[ (X+i) % 256 ] ^ (uint32_t)V1[ (uint32_t)(floor(X/256)+1) % 256 ] ) % m;
 }
 
-void R10Encoder::trip(uint8_t X)
+void R10Encoder::trip(uint8_t X, uint16_t* triple)
 {
   uint8_t L_ = L;
   while(!is_prime(L_))
@@ -259,8 +259,43 @@ void R10Encoder::trip(uint8_t X)
   uint16_t Y_ = (B_ + X*A_) % Q;
   uint16_t v = rand(Y_, 0, 2^20);
 
-  uint16_t d = deg(v);
-  uint16_t a = 1 + rand(Y_, 1, L_-1);
-  uint16_t b = rand(Y_, 2, L_);
+  triple[0] = deg(v);                // d
+  triple[1] = 1 + rand(Y_, 1, L_-1); // a
+  triple[2] = rand(Y_, 2, L_);       // b
+}
 
+uint16_t R10Encoder::LTEnc(uint16_t K, uint8_t* C, uint16_t* triple)
+{
+  uint8_t L_ = L;
+  while(!is_prime(L_))
+    L_ = L_++;
+  uint16_t d = triple[0];
+  uint16_t a = triple[1];
+  uint16_t b = triple[2];
+
+  while (b >= L)
+    b = (b + a) % L_;
+
+  uint16_t result = C[b];
+
+  uint16_t cond = std::min(d-1, L-1);
+  for (int j = 1; j < cond; j++)
+    {
+      b = (b + a) % L_;
+      while (b >= L)
+	{
+	  b = (b + a) % L_;
+	}
+      result = (uint16_t)result ^ (uint16_t)C[b];
+    }
+  return result;
+}
+
+void R10Encoder::reordering()
+{
+  int i = 0;
+  int u = 0;
+  uint8_t* V;
+
+  
 }

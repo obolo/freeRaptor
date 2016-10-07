@@ -34,5 +34,9 @@ int main(int argc, char* argv[])
   std::cout <<"Here is H: " << (unsigned)enc.H << std::endl;
   std::cout << "Here is the encoding matrix:" << std::endl;
   print_matrix(enc.A, enc.L + K, enc.L + K);
+  uint16_t d = 4;
+  uint16_t a = 6;
+  uint16_t b = 7;
+  uint16_t t[3] = {d, a, b};
 
 }

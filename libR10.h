@@ -107,17 +107,32 @@ class R10Encoder
    * Method for generating the triple that will be sent
    * along with the encoded packet.
    */
-  void trip(uint8_t X);
+  void trip(uint8_t X, uint16_t* triple);
   /**
    * Method for obtaining random values to be used in
    * the degree function and trip function
    */
   uint32_t rand(uint16_t X, uint16_t i, uint16_t m);
   /**
+   * Method used for the LT encoding process.
+   */
+  uint16_t LTEnc(uint16_t K, uint8_t* C, uint16_t* triple);
+  /**
+   * Method for reordering matrix A through linear
+   * operations into suitable form for decoding.
+   * The process is governed by the decoding schedule.
+   */
+  void reordering();
+  /**
    * Main method used for encoding. Fuck you!
    * Yes, fuck you!
    */
   void encode();
+  /**
+   * Main method used for decoding. Fuck you!
+   * Yes, fuck you!
+   */
+  void decode();
 
   
   const uint16_t Q = 65521; /** Largest prime number smaller than 2**16 */
@@ -140,6 +155,11 @@ class R10Encoder
 
   uint32_t f[8] = {0,10241,491582,712794,831695,948446,1032189,1048576}; // degree distribution f function
   uint8_t  d[7] = {1,2,3,4,10,11,40};      // degree distribution d function
+
+  // Data used for decoding
+  uint16_t SBN;
+  uint16_t ESI;
+  uint16_t RESERVED; 
 
   // V0 and V1 tables
   uint32_t V0[256] = {251291136, 3952231631, 3370958628, 4070167936, 123631495, 3351110283,
@@ -238,5 +258,6 @@ class R10Encoder
 		      2901868599, 678860040, 3812229107, 19936821, 1119590141, 3640121682,
 		      3545931032, 2102949142, 2828208598, 3603378023, 4135048896};
 };
+
 
 #endif
