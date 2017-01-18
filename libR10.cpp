@@ -106,7 +106,8 @@ R10Encoder::R10Encoder(uint8_t K_, uint64_t F_, uint8_t W_, uint64_t P_, uint8_t
   P(P_),
   S(0),
   H(0),
-  T(8)
+  T(8),
+  FECID(1)
 {
   setS();
   setH();
@@ -119,7 +120,7 @@ R10Encoder::R10Encoder(uint8_t K_, uint64_t F_, uint8_t W_, uint64_t P_, uint8_t
   // obtain the constraint matrix
   constraintMatrix();
 
-  // read Systematic index
+  // read Systematic Index table
   uint16_t count = 0;
   J = new uint16_t[8189];
   std::ifstream read_systematic("systematic.dat");
@@ -135,6 +136,7 @@ R10Encoder::R10Encoder(uint8_t K_, uint64_t F_, uint8_t W_, uint64_t P_, uint8_t
 	}
     }
 }
+
 
 R10Encoder::~R10Encoder(){}
 
@@ -296,6 +298,5 @@ void R10Encoder::reordering()
   int i = 0;
   int u = 0;
   uint8_t* V;
-
   
 }
