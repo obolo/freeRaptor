@@ -32,9 +32,9 @@
  * Class representing a GF(2) matrix.
  * Representation based on the 32 bit packed words.
  */
+
 class GF2mat
 {
-
 public:
 /**
  * Constructor for generating a GF(2) matrix represented as 32 bit packed words
@@ -60,16 +60,23 @@ int get_entry(int row, int col);
  * Method for setting an entry of a GF2mat matrix
  */
 void set_entry(int row, int col, int val);
+/**
+ * Method for printing a GF(2) matrix to the stdout
+ */
+void print();
 
-private:
+protected:
 int n_col; /** Number of columns of the GF(2) matrix */
 int n_row; /** Number of rows of the GF(2) matrix */
-int n_words; /** Number of 32-bit words used to represent a single column*/
-const int wordsize = 32; /** Number of bits that are group together. If needed. */
+int n_word; /** Number of 32-bit words used to represent a single column*/
+const int wordsize = 32; /** Number of bits that are group together. If needed */
+const int wordmasksize = 5; /** Number of 1 bits in the word mask */
+const int wordmask = 0x1f; /** Bitmask used to perfom modulo operation bitwisely */
 
-uint32_t** gf2mat;
+uint32_t** cols; /** Main ref to tha matrix data. Pointer to array of pointers to columns */
+uint32_t* gf2mat; /** Block of memory used to manage bits */
 
-}
+};
 
 
 #endif

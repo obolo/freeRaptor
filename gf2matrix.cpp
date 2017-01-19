@@ -13,10 +13,23 @@
 // You should have received a copy of the GNU General Public License
 // along with freeRaptor.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <gf2matrix.h>
+
 GF2mat::GF2mat(int n_rows, int n_cols)
-  :n_row(n_rows),n_col(n_cols)
+  :
+  n_row(n_rows), 
+  n_col(n_cols)
 {
-  gf2mat = calloc(n_col, sizeof );
+  n_word = (n_row + wordsize-1) >> wordmasksize;
+
+  cols = (uint32_t**) calloc(n_col, sizeof *cols);
+  gf2mat = (uint32_t*) calloc(n_word*n_col, sizeof *gf2mat);
+
+  //Assign columns pointers: leap n_word words at a time
+  for (int i = 0; i < n_col; i++)
+    {
+      cols[i] = gf2mat  + i*(n_word);
+    }
 }
 
 GF2mat::~GF2mat(){}
@@ -33,7 +46,22 @@ int GF2mat::get_ncols()
 
 int GF2mat::get_entry(int row, int col)
 {
-  return cols[col]  (word >> n) & 1;
+  return ((cols[col][row>>wordmasksize]) >> (row&wordmask)) & 1;
 }
 
-void GF2mat::set_entry(){}
+void GF2mat::set_entry(int row, int col, int val)
+{
+  ((cols[col][row>>wordmasksize]) >> (row&wordmask)) 
+}
+
+void GF2mat::print()
+{
+  for (int i = 0; i < n_row; i++)
+    {
+      for (int j = 0; j < n_col; j++)
+	{
+	  std::cout << get_entry(i,j) << " ";
+	}
+      std::cout << "\n";
+    }
+}
