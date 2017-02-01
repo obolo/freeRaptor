@@ -20,8 +20,8 @@
  * @file    gf2matrix.h
  */
 
-#ifndef LIBR10_H
-#define LIBR10_H
+#ifndef GF2MATRIX_H
+#define GF2MATRIX_H
 
 #include <iostream>
 #include <string>
@@ -35,46 +35,46 @@
 
 class GF2mat
 {
-public:
-/**
- * Constructor for generating a GF(2) matrix represented as 32 bit packed words
- */
-GF2mat(int n_rows, int n_cols);
-/**
- * Destructor of the GF(2) matrix
- */
-~GF2mat();
-/**
- * Method for obtaining the number of rows
- */
-int get_nrows();
-/**
- * Method for obtaining the number of columns
- */
-int get_ncols();
-/**
- * Method for obtaining an entry of a GF2mat matrix
- */
-int get_entry(int row, int col);
-/**
- * Method for setting an entry of a GF2mat matrix
- */
-void set_entry(int row, int col, int val);
-/**
- * Method for printing a GF(2) matrix to the stdout
- */
-void print();
+ public:
+  /**
+   * Constructor for generating a GF(2) matrix represented as 32 bit packed words
+   */
+  GF2mat(int n_rows, int n_cols);
+  /**
+   * Destructor of the GF(2) matrix
+   */
+  ~GF2mat();
+  /**
+   * Method for obtaining the number of rows
+   */
+  int get_nrows();
+  /**
+   * Method for obtaining the number of columns
+   */
+  int get_ncols();
+  /**
+   * Method for obtaining an entry of a GF2mat matrix
+   */
+  int get_entry(int row, int col);
+  /**
+   * Method for setting an entry of a GF2mat matrix
+   */
+  void set_entry(int row, int col, int val);
+  /**
+   * Method for printing a GF(2) matrix to the stdout
+   */
+  void print();
 
-protected:
-int n_col; /** Number of columns of the GF(2) matrix */
-int n_row; /** Number of rows of the GF(2) matrix */
-int n_word; /** Number of 32-bit words used to represent a single column*/
-const int wordsize = 32; /** Number of bits that are group together. If needed */
-const int wordmasksize = 5; /** Number of 1 bits in the word mask */
-const int wordmask = 0x1f; /** Bitmask used to perfom modulo operation bitwisely */
+ protected:
+  int n_col; /** Number of columns of the GF(2) matrix */
+  int n_row; /** Number of rows of the GF(2) matrix */
+  int n_word; /** Number of 32-bit words used to represent a single column*/
+  const int wordsize = 32; /** Number of bits that are group together. If needed */
+  const int wordmasksize = 5; /** Number of 1 bits in the word mask */
+  const int wordmask = 0x1f; /** Bitmask used to perfom modulo operation bitwisely */
 
-uint32_t** cols; /** Main ref to tha matrix data. Pointer to array of pointers to columns */
-uint32_t* gf2mat; /** Block of memory used to manage bits */
+  uint32_t** cols; /** Main ref to tha matrix data. Pointer to array of pointers to columns */
+  uint32_t* gf2mat; /** Block of memory used to manage bits */
 
 };
 

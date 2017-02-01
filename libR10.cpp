@@ -96,27 +96,34 @@ uint32_t* collect_m(int k, int N)
 }
 
 
-
-R10Encoder::R10Encoder(uint8_t K_, uint64_t F_, uint8_t W_, uint64_t P_, uint8_t Al,
-		       uint16_t Kmax, uint16_t Kmin, uint8_t Gmax)
+R10Codec::R10Codec(int K_, int N_)
   :
   K(K_),
-  F(F_),
-  W(W_),
-  P(P_),
-  S(0),
-  H(0),
-  T(8),
-  FECID(1)
+  N(N_)
 {
+  // Initialize values for S and H
   setS();
   setH();
 
-  // initialize the encoding matrix
-  A = new uint8_t*[L+K];
-  for(int i = 0; i < L+K; ++i)
-    A[i] = new uint8_t[L+K]();
+  L = S + H;
 
+  // Allocate the A matrix
+  A = new GF2mat(K+L, K+L);
+}
+
+R10Codec::~R10Codec()
+{
+  delete A;
+}
+
+R10Encoder::R10Encoder(int K, int N)
+  :
+  R10Codec(K, N),
+  FECID(1),
+  SBN(0),
+  ESI(0),
+  RESERVED(0)
+{
   // obtain the constraint matrix
   constraintMatrix();
 
@@ -141,7 +148,7 @@ R10Encoder::R10Encoder(uint8_t K_, uint64_t F_, uint8_t W_, uint64_t P_, uint8_t
 R10Encoder::~R10Encoder(){}
 
 
-void R10Encoder::setS()
+void R10Codec::setS()
 {
   int X = (int)(sqrt(2*K));
   while(X*(X-1) < 2*K)
@@ -157,7 +164,7 @@ void R10Encoder::setS()
 }
 
 
-void R10Encoder::setH()
+void R10Codec::setH()
 {
   int h = 1;
   while (choose(h, ceil(h/2)) < K+S)
@@ -180,9 +187,9 @@ void R10Encoder::setLDPCSymbols()
       int i3 = (2*(i + 1)) % S;
       for (int c = 0; c < S; c++)
 	{
-	  A[(i1+c)%S][c+S*i] = 1;
-	  A[(i2+c)%S][c+S*i] = 1;
-	  A[(i3+c)%S][c+S*i] = 1;
+	  A->set_entry((i1+c)%S, c+S*i, 1);
+	  A->set_entry((i2+c)%S, c+S*i, 1);
+	  A->set_entry((i3+c)%S, c+S*i, 1);
 	}
     }
   // Do the last circulant matrix
@@ -193,15 +200,15 @@ void R10Encoder::setLDPCSymbols()
     int i3 = (2*(i + 1)) % S;
     for (int c = 0; c < K%S; c++)
       {
-	A[(i1+c)%S][c+S*i] = 1;
-	A[(i2+c)%S][c+S*i] = 1;
-	A[(i3+c)%S][c+S*i] = 1;
+	A->set_entry((i1+c)%S, c+S*i, 1);
+	A->set_entry((i2+c)%S, c+S*i, 1);
+	A->set_entry((i3+c)%S, c+S*i, 1);
       }
   }
   // Now fill the SxS identity matrix
   for (int i = 0; i < S; i++)
     {
-      A[i][K+i] = 1;
+      A->set_entry(i, K+i, 1);
     }
 }
 
@@ -216,14 +223,15 @@ void R10Encoder::setHalfSymbols()
       uint8_t number = m[c];
       for(int b = 0; b < H; b++)
 	{
-           A[b+S][c] = ((number >> b) & 1);
+	  //A[b+S][c] = ((number >> b) & 1);
+	  A->set_entry(b+S, c, ((number >> b) & 1));
 	}
     }
 
-  // Now fill the SxS identity matrix
+  // Now fill the HxH identity matrix
   for (int i = 0; i < H; i++)
     {
-      A[i+S][i+K+S] = 1;
+      A->set_entry(i+S, i+K+S, 1);
     }  
 }
 
@@ -293,10 +301,19 @@ uint16_t R10Encoder::LTEnc(uint16_t K, uint8_t* C, uint16_t* triple)
   return result;
 }
 
-void R10Encoder::reordering()
+void R10Encoder::print_matrix()
 {
-  int i = 0;
-  int u = 0;
-  uint8_t* V;
-  
+  A->print();
 }
+
+
+R10Decoder::R10Decoder(int K, int N)
+  :
+  R10Codec(K, N),
+  FECID(1),
+  SBN(0),
+  ESI(0),
+  RESERVED(0)
+{}
+
+R10Decoder::~R10Decoder(){}

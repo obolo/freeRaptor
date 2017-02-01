@@ -25,14 +25,13 @@
 #define LIBR10_H
 
 #include <iostream>
-#include <array>
-#include <bitset>
-#include <algorithm>
-#include <assert.h>
-#include <fstream>
-#include <iostream>
 #include <string>
 #include <sstream>
+#include <fstream>
+#include <algorithm>
+#include <assert.h>
+#include <math.h>
+#include <gf2matrix.h>
 
 // Definitions:
 //
@@ -47,12 +46,30 @@ class R10Codec
 {
   
  public:
-  
-  R10codec();
-
-  ~R10codec();
+  /**
+   * Constructor for the R10Codec class
+   * @param K integer number of input source symbols
+   * @param N integer number of output encoding symbols  
+   */
+  R10Codec(int K, int N);
+  /**
+   * Destructor for the R10Codec class
+   */
+  ~R10Codec();
 
  protected:
+
+  /**
+   * Method used for obtaining the size S for the
+   * LDPC symbols.
+   */
+  void setS();
+  /**
+   * Method used for obtaining the size H for the
+   * Half symbols.
+   */
+  void setH();
+  
   // V0 and V1 tables
   uint32_t V0[256] = {251291136, 3952231631, 3370958628, 4070167936, 123631495, 3351110283,
 		      3218676425, 2011642291, 774603218, 2402805061, 1004366930,
@@ -149,6 +166,20 @@ class R10Codec
 		      3762994475, 3171962488, 442160826, 198349622, 45942637, 1324086311,
 		      2901868599, 678860040, 3812229107, 19936821, 1119590141, 3640121682,
 		      3545931032, 2102949142, 2828208598, 3603378023, 4135048896};
+  
+  int K; /** Number of input surce symbols*/
+  int N; /** Number of output encoding symbols for the first round*/
+  uint32_t f[8] = {0,10241,491582,712794,831695,948446,1032189,1048576}; /** Degree distribution f
+                                                                                           function */
+  uint8_t  d[7] = {1,2,3,4,10,11,40}; /** Degree distribution d function  */
+
+  GF2mat* A; /** Constraint matrix */
+
+  const uint16_t Q = 65521; /** Largest prime number smaller than 2**16 */
+  
+  int S;  /** Number of intermediate LDPC symbols */
+  int H;  /** Number of intermediate HDPC symbols */
+  int L;  /** Number of intermediate symbols in the Intermediate Block */
 };
 
 
@@ -157,18 +188,12 @@ class R10Encoder : public R10Codec
  public:
   /**
    * Constructor for the R10Encoder class
-   * @param F integer transfer length of the object in bytes
-   * @param W target size of the sub-blocks in bytes
-   * @param P maximum payload size in bytes (multiple of Al)
-   * @param Al integer symbol alignment parameter (default 4)
-   * @param Kmax integer maximum number of source symbols (constant 8192)
-   * @param Kmin integer minimum number of source symbols (default 1024)
-   * @param Gmax integer maximum number of symbols within an encoding group (default 10)
+   * @param K integer number of input source symbols
+   * @param N integer number of output encoding symbols
    */
-  R10Encoder(uint8_t K_, uint64_t F_, uint8_t W_, uint64_t P_, uint8_t Al=4,
-	     uint16_t Kmax=8192, uint16_t Kmin=1024, uint8_t Gmax=10);
+  R10Encoder(int K, int N);
   /**
-   * Destructor for the libR10 class
+   * Destructor for the libR10Encoder class
    */
   ~R10Encoder();
   /**
@@ -183,26 +208,12 @@ class R10Encoder : public R10Codec
    */
   uint32_t deg(uint16_t v);
   /**
-   * Method used for obtaining the size S for the
-   * LDPC symbols.
-   */
-  void setS();
-  /**
-   * Method used for obtaining the size H for the
-   * Half symbols.
-   */
-  void setH();
-  /**
    * Method to obtain the S LDPC intermediate symbols
-   * @param S integer nuumber of LDPC intermediate symbols to generate
-   * @param C char pointer to the K first intermediate symbols
    */
   void setLDPCSymbols();  
   /**
    * Method to obtain the H Half intermediate symbols.
    * Basically circulant matrices.
-   * @param H integer nuumber of Half intermediate symbols to generate
-   * @param C char pointer to the K first intermediate symbols
    */
   void setHalfSymbols();
   /**
@@ -225,12 +236,6 @@ class R10Encoder : public R10Codec
    */
   uint16_t LTEnc(uint16_t K, uint8_t* C, uint16_t* triple);
   /**
-   * Method for reordering matrix A through linear
-   * operations into suitable form for decoding.
-   * The process is governed by the decoding schedule.
-   */
-  void reordering();
-  /**
    * Main method used for encoding. Fuck you!
    * Yes, fuck you!
    */
@@ -240,15 +245,11 @@ class R10Encoder : public R10Codec
    * Yes, fuck you!
    */
   void decode();
-
-  
-  const uint16_t Q = 65521; /** Largest prime number smaller than 2**16 */
-  
-  uint8_t K;  /** Number of source symbols in a Source Block */
-
-  uint8_t S;  /** Number of intermediate LDPC symbols */
-  uint8_t H;  /** Number of intermediate HDPC symbols */
-  uint8_t L;  /** Number of intermediate symbols in the Intermediate Block */
+  /**
+   * Method oo print the generator matrix: used while
+   * developing to check consistency.
+   */
+  void print_matrix();
 
   uint16_t T; /** Encoding Symbol Length (bytes)*/
   uint16_t Z; /** number of Source Blocks*/
@@ -257,13 +258,10 @@ class R10Encoder : public R10Codec
   uint64_t P; /** payload size of each packet (bytes)*/
   uint8_t W;  /** target on the sub block size (bytes)*/
 
-  uint8_t** A;
-  uint16_t* J;
+  //GF2mat A;    /** Generator matrix for the Code Constraints PreProcessor */
+  uint16_t* J; /** Systematic Index (defined in RFC5053) */
 
-  uint32_t f[8] = {0,10241,491582,712794,831695,948446,1032189,1048576}; // degree distribution f function
-  uint8_t  d[7] = {1,2,3,4,10,11,40};      // degree distribution d function
-
-  // Data used for decoding
+  // Data used for decoding stream
   uint16_t FECID;
   uint16_t SBN;
   uint16_t ESI;
@@ -274,7 +272,24 @@ class R10Encoder : public R10Codec
 
 class R10Decoder : public R10Codec
 {
-  
-}
+ public:
+  /**
+   * Constructor for the R10Decoder class
+   */
+  R10Decoder(int K, int N);
+  /**
+   * Destructor for the R10Decoder class
+   */
+  ~R10Decoder();
+
+ protected:
+  // Data used for decoding stream: encoder and decoder keep their own counters
+  uint16_t FECID; /** Value for the FEC ID (1 as per IANA def)*/
+  uint16_t SBN;   /** Counter for the Source Block Number */
+  uint16_t ESI;   /** Counter for the Encoding Symbol ID */
+  uint16_t RESERVED; /** Reserved field */
+
+  //GF2mat A;    /** Generator matrix for the Code Constraints PreProcessor */
+};
 
 #endif

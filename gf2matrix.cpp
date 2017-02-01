@@ -51,7 +51,7 @@ int GF2mat::get_entry(int row, int col)
 
 void GF2mat::set_entry(int row, int col, int val)
 {
-  ((cols[col][row>>wordmasksize]) >> (row&wordmask)) 
+  (cols[col][row>>wordmasksize]) ^= (-val ^ (cols[col][row>>wordmasksize])) & (1 << (row&wordmask));
 }
 
 void GF2mat::print()
