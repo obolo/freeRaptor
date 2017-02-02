@@ -221,6 +221,11 @@ class R10Encoder : public R10Codec
    * This is the main block used for the encoding process.
    */
   void constraintMatrix();
+    /**
+   * Method for setting the LT symbols in the precode matrix.
+   * This is needed to make the code systematic.
+   */
+  void setLTSymbols();
   /**
    * Method for generating the triple that will be sent
    * along with the encoded packet.
@@ -246,7 +251,7 @@ class R10Encoder : public R10Codec
    */
   void decode();
   /**
-   * Method oo print the generator matrix: used while
+   * Method to print the generator matrix: used while
    * developing to check consistency.
    */
   void print_matrix();

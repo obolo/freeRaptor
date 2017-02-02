@@ -142,6 +142,7 @@ R10Encoder::R10Encoder(int K, int N)
 	  count++;
 	}
     }
+  setLTSymbols();
 }
 
 
@@ -216,14 +217,14 @@ void R10Encoder::setHalfSymbols()
 {
   // Obtain what is called H prime in the RFC
   uint8_t H_ = ceil((double)H/2);
+
   // Collect the first K+S specular gray sequences of weight H_
   uint32_t* m = collect_m(H_, K+S);
   for(int c = 0; c < K+S; c++)
     {
-      uint8_t number = m[c];
+      uint32_t number = m[c];
       for(int b = 0; b < H; b++)
 	{
-	  //A[b+S][c] = ((number >> b) & 1);
 	  A->set_entry(b+S, c, ((number >> b) & 1));
 	}
     }
@@ -241,12 +242,46 @@ void R10Encoder::constraintMatrix()
   setHalfSymbols();
 }
 
+void R10Encoder::setLTSymbols()
+{
+  uint16_t L_ = (uint16_t)L;
+  while(!is_prime(L_))
+    L_ = L_++;
+
+  for (uint8_t X = 1; X < (uint16_t)K; X++)
+     {
+      uint16_t* triple;
+      trip(X, triple);
+      uint16_t d = triple[0];
+      uint16_t a = triple[1];
+      uint16_t b = triple[2];
+
+  
+      while(b >= L)
+  	{
+  	  b = (b + a) % L_;
+  	}
+
+      A->set_entry(S+H+X, b, 1);
+
+      for (uint8_t j=1; j<d; j++)
+  	{
+  	  b = (b + a) % L_;
+  	  while(b >= L)
+  	    {
+  	      b = (b + a) % L_;
+  	    }
+  	  A->set_entry(S+H+X,  b, 1);
+  	}
+    }
+}
+
 uint32_t R10Encoder::deg(uint16_t v)
 {
   int ind = 0;
-  for (int i = 0; i < 8; i++)
+  for (int i = 1; i < 8; i++)
     {
-      if (v < f[i])
+      if (v > f[i-1])
 	ind = i;
     }
   return d[ind];
