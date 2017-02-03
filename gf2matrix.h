@@ -61,6 +61,20 @@ class GF2mat
    */
   void set_entry(int row, int col, int val);
   /**
+   * Method for exchanging 2 rows
+   */
+  void row_exchange(int a, int b);
+    /**
+   * Method for exchanging 2 columns
+   */
+  void col_exchange();
+    /**
+   * Method for inverting to Gaussian Elimination method.
+   * Other methods, such as Belief Propagation or Inactivation Decoding
+   * may be implemented in the future.
+   */
+  void invert_GE();
+  /**
    * Method for printing a GF(2) matrix to the stdout
    */
   void print();
@@ -74,6 +88,7 @@ class GF2mat
   const int wordmask = 0x1f; /** Bitmask used to perfom modulo operation bitwisely */
 
   uint32_t** cols; /** Main ref to tha matrix data. Pointer to array of pointers to columns */
+  uint32_t** rows; /** Main ref to tha matrix data. Pointer to array of pointers to rows */
   uint32_t* gf2mat; /** Block of memory used to manage bits */
 
 };

@@ -264,7 +264,7 @@ void R10Encoder::setLTSymbols()
 
       A->set_entry(S+H+X, b, 1);
 
-      for (uint8_t j=1; j<d; j++)
+      for (uint16_t j=1; j<d; j++)
   	{
   	  b = (b + a) % L_;
   	  while(b >= L)
@@ -341,6 +341,11 @@ void R10Encoder::print_matrix()
   A->print();
 }
 
+void R10Encoder::decode()
+{
+  A->invert_GE();
+}
+
 
 R10Decoder::R10Decoder(int K, int N)
   :
@@ -352,3 +357,8 @@ R10Decoder::R10Decoder(int K, int N)
 {}
 
 R10Decoder::~R10Decoder(){}
+
+GF2mat R10Encoder::get_mat()
+{
+  return *A;
+}

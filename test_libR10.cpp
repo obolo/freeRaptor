@@ -14,7 +14,14 @@ int main(int argc, char* argv[])
   
   R10Encoder enc(K, N); // R10Encoder object example
 
+  std::cout << "Original constraint matrix:" << "\n";
+  enc.print_matrix();
+
+  enc.decode();
+
+  std::cout << "Inverted through GE:" << "\n";
   enc.print_matrix();
   
-
+  return 0;
+  
 }

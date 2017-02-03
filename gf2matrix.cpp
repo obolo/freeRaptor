@@ -20,15 +20,19 @@ GF2mat::GF2mat(int n_rows, int n_cols)
   n_row(n_rows), 
   n_col(n_cols)
 {
-  n_word = (n_row + wordsize-1) >> wordmasksize;
+  //n_word = (n_row + wordsize-1) >> wordmasksize;
+  n_word = (n_col + wordsize-1) >> wordmasksize;
 
-  cols = (uint32_t**) calloc(n_col, sizeof *cols);
-  gf2mat = (uint32_t*) calloc(n_word*n_col, sizeof *gf2mat);
+  //cols = (uint32_t**) calloc(n_col, sizeof *cols);
+  rows = (uint32_t**) calloc(n_col, sizeof *rows);
+  //gf2mat = (uint32_t*) calloc(n_word*n_col, sizeof *gf2mat);
+  gf2mat = (uint32_t*) calloc(n_word*n_row, sizeof *gf2mat);
 
   //Assign columns pointers: leap n_word words at a time
-  for (int i = 0; i < n_col; i++)
+  for (int i = 0; i < n_row; i++)
     {
-      cols[i] = gf2mat  + i*(n_word);
+      //cols[i] = gf2mat  + i*(n_word);
+      rows[i] = gf2mat  + i*(n_word);
     }
 }
 
@@ -46,12 +50,44 @@ int GF2mat::get_ncols()
 
 int GF2mat::get_entry(int row, int col)
 {
-  return ((cols[col][row>>wordmasksize]) >> (row&wordmask)) & 1;
+  //return ((cols[col][row>>wordmasksize]) >> (row&wordmask)) & 1;
+  return ((rows[row][col>>wordmasksize]) >> (col&wordmask)) & 1;
 }
 
 void GF2mat::set_entry(int row, int col, int val)
 {
-  (cols[col][row>>wordmasksize]) ^= (-val ^ (cols[col][row>>wordmasksize])) & (1 << (row&wordmask));
+  //(cols[col][row>>wordmasksize]) ^= (-val ^ (cols[col][row>>wordmasksize])) & (1 << (row&wordmask));
+  (rows[row][col>>wordmasksize]) ^= (-val ^ (rows[row][col>>wordmasksize])) & (1 << (col&wordmask));
+}
+
+void GF2mat::row_exchange(int a, int b)
+{
+  uint32_t* temp = rows[a];
+  rows[a] = rows[b];
+  rows[b] = temp;
+}
+
+void GF2mat::invert_GE()
+{
+  int i;
+  int j;
+  for (i = 0; i < n_row; i++)
+    {
+      j = i;
+      while(j < (n_row-1) && get_entry(j, i) == 0)
+  	  j++;
+      if (i != j)
+  	row_exchange(i, j);
+      for (int k=0; k < n_row; k++)
+	{
+	  if (k != i && get_entry(k, i) == 1)
+	    {
+	      *rows[k] = *rows[k] ^ *rows[i];
+	      // for (int l=0; l < n_col; l++)
+	      // 	set_entry(k, l, (get_entry(k,l)) ^ (get_entry(i,l)));
+	    }
+	}
+    }
 }
 
 void GF2mat::print()
@@ -64,4 +100,5 @@ void GF2mat::print()
 	}
       std::cout << "\n";
     }
+  return;
 }

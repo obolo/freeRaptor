@@ -252,9 +252,13 @@ class R10Encoder : public R10Codec
   void decode();
   /**
    * Method to print the generator matrix: used while
-   * developing to check consistency.
+   * developing to check consistency. Possibly TBE!
    */
   void print_matrix();
+  /**
+   * Obtain the constraint matrix for debugging purposes: TBE!
+   */
+  GF2mat get_mat();
 
   uint16_t T; /** Encoding Symbol Length (bytes)*/
   uint16_t Z; /** number of Source Blocks*/
