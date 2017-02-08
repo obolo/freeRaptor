@@ -77,10 +77,10 @@ uint32_t gray_sequence(uint32_t i)
  * smarter up to now. To Be Improved!
  * @return pointer to array of 32 bit uintegers
  */
-uint32_t* collect_m(int k, int N)
+uint32_t* collect_m(int k, int N, uint32_t* m)
 {
   
-  uint32_t* m = new uint32_t[N]();
+  //uint32_t* m = new uint32_t[N]();
   int n = 0;
   int i = 0;
   while(n < N)
@@ -92,7 +92,7 @@ uint32_t* collect_m(int k, int N)
 	}
       i++;
     }
-  return m;
+  //return m;
 }
 
 
@@ -109,11 +109,16 @@ R10Codec::R10Codec(int K_, int N_)
 
   // Allocate the A matrix
   A = new GF2mat(K+L, K+L);
+  G_LDPC = new GF2mat(S, K);
+  G_Half = new GF2mat(H, K+S);
 }
 
 R10Codec::~R10Codec()
 {
   delete A;
+  delete G_LDPC;
+  delete G_Half;
+  delete[] J;
 }
 
 R10Encoder::R10Encoder(int K, int N)
@@ -129,7 +134,7 @@ R10Encoder::R10Encoder(int K, int N)
 
   // read Systematic Index table
   uint16_t count = 0;
-  J = new uint16_t[8189];
+  J = new uint16_t[8189]{0};
   std::ifstream read_systematic("systematic.dat");
   std::string line;
   while(getline(read_systematic, line))
@@ -142,7 +147,6 @@ R10Encoder::R10Encoder(int K, int N)
 	  count++;
 	}
     }
-  setLTSymbols();
 }
 
 
@@ -176,7 +180,7 @@ void R10Codec::setH()
   L = S + H; // given that we have S and also H initilize also L
 }
 
-void R10Encoder::setLDPCSymbols()
+void R10Codec::setLDPCSymbols()
 {
   assert(S != 0);
 
@@ -191,6 +195,10 @@ void R10Encoder::setLDPCSymbols()
 	  A->set_entry((i1+c)%S, c+S*i, 1);
 	  A->set_entry((i2+c)%S, c+S*i, 1);
 	  A->set_entry((i3+c)%S, c+S*i, 1);
+	  
+	  G_LDPC->set_entry((i1+c)%S, c+S*i, 1);
+	  G_LDPC->set_entry((i2+c)%S, c+S*i, 1);
+	  G_LDPC->set_entry((i3+c)%S, c+S*i, 1);
 	}
     }
   // Do the last circulant matrix
@@ -204,28 +212,37 @@ void R10Encoder::setLDPCSymbols()
 	A->set_entry((i1+c)%S, c+S*i, 1);
 	A->set_entry((i2+c)%S, c+S*i, 1);
 	A->set_entry((i3+c)%S, c+S*i, 1);
+	
+	G_LDPC->set_entry((i1+c)%S, c+S*i, 1);
+	G_LDPC->set_entry((i2+c)%S, c+S*i, 1);
+	G_LDPC->set_entry((i3+c)%S, c+S*i, 1);
       }
   }
   // Now fill the SxS identity matrix
   for (int i = 0; i < S; i++)
     {
       A->set_entry(i, K+i, 1);
+      G_LDPC->set_entry(i, K+i, 1);
     }
 }
 
-void R10Encoder::setHalfSymbols()
+void R10Codec::setHalfSymbols()
 {
+  assert(H != 0);
+  
   // Obtain what is called H prime in the RFC
   uint8_t H_ = ceil((double)H/2);
 
   // Collect the first K+S specular gray sequences of weight H_
-  uint32_t* m = collect_m(H_, K+S);
+  uint32_t* m = new uint32_t[K+S]();
+  collect_m(H_, K+S, m);
   for(int c = 0; c < K+S; c++)
     {
       uint32_t number = m[c];
       for(int b = 0; b < H; b++)
 	{
 	  A->set_entry(b+S, c, ((number >> b) & 1));
+	  G_Half->set_entry(b, c, ((number >> b) & 1));
 	}
     }
 
@@ -233,16 +250,18 @@ void R10Encoder::setHalfSymbols()
   for (int i = 0; i < H; i++)
     {
       A->set_entry(i+S, i+K+S, 1);
-    }  
+      G_Half->set_entry(i, i+K+S, 1);
+    }
+  delete[] m;
 }
 
-void R10Encoder::constraintMatrix()
+void R10Codec::constraintMatrix()
 {
   setLDPCSymbols();
   setHalfSymbols();
 }
 
-void R10Encoder::setLTSymbols()
+void R10Codec::setLTSymbols()
 {
   uint16_t L_ = (uint16_t)L;
   while(!is_prime(L_))
@@ -250,11 +269,11 @@ void R10Encoder::setLTSymbols()
 
   for (uint8_t X = 1; X < (uint16_t)K; X++)
      {
-      uint16_t* triple;
+       uint32_t triple[3]{0};
       trip(X, triple);
-      uint16_t d = triple[0];
-      uint16_t a = triple[1];
-      uint16_t b = triple[2];
+      uint16_t d = (uint16_t)triple[0];
+      uint16_t a = (uint16_t)triple[1];
+      uint16_t b = (uint16_t)triple[2];
 
   
       while(b >= L)
@@ -276,7 +295,7 @@ void R10Encoder::setLTSymbols()
     }
 }
 
-uint32_t R10Encoder::deg(uint16_t v)
+uint32_t R10Codec::deg(uint16_t v)
 {
   int ind = 0;
   for (int i = 1; i < 8; i++)
@@ -287,12 +306,12 @@ uint32_t R10Encoder::deg(uint16_t v)
   return d[ind];
 }
 
-uint32_t R10Encoder::rand(uint16_t X, uint16_t i, uint16_t m)
+uint32_t R10Codec::rand(uint16_t X, uint16_t i, uint16_t m)
 {
   return ( (uint32_t)V0[ (X+i) % 256 ] ^ (uint32_t)V1[ (uint32_t)(floor(X/256)+1) % 256 ] ) % m;
 }
 
-void R10Encoder::trip(uint8_t X, uint16_t* triple)
+void R10Codec::trip(uint8_t X, uint32_t triple[])
 {
   uint8_t L_ = L;
   while(!is_prime(L_))
@@ -309,7 +328,7 @@ void R10Encoder::trip(uint8_t X, uint16_t* triple)
   triple[2] = rand(Y_, 2, L_);       // b
 }
 
-uint16_t R10Encoder::LTEnc(uint16_t K, uint8_t* C, uint16_t* triple)
+uint16_t R10Codec::LTEnc(uint16_t K, uint8_t* C, uint16_t* triple)
 {
   uint8_t L_ = L;
   while(!is_prime(L_))
@@ -336,14 +355,39 @@ uint16_t R10Encoder::LTEnc(uint16_t K, uint8_t* C, uint16_t* triple)
   return result;
 }
 
-void R10Encoder::print_matrix()
+void R10Codec::print_matrix()
 {
   A->print();
 }
 
+void R10Encoder::encode(int X)
+{
+  // Vector containing the encoding symbols
+  GF2mat C_(L, 1);
+  // Clear previous entries for G_LT
+  A->clear_LT(K, S, H);
+  // Build A matrix: rebuild G_LT
+  setLTSymbols();
+  // Vector that holds the source symbols
+  GF2mat D(L+K,1);
+  for (int i = L; i < L+K; i++)
+    D.set_entry(i, 1, 1);
+  // Invert the A matrix
+  GF2mat A_(*A);
+  A_.invert_GE();
+  // Multiply by d: generate Intermediate Symbols
+  GF2mat c = A_*D;
+  // Produce LT symbols
+  for (uint8_t k = K; k < (uint8_t)(L); k++)
+    {
+      uint32_t* treep[3] = {0};
+      trip(k, treep);
+      uint16_t c_ = LTEnc(k, c, treep);
+    }
+}
+
 void R10Encoder::decode()
 {
-  A->invert_GE();
 }
 
 
@@ -358,7 +402,7 @@ R10Decoder::R10Decoder(int K, int N)
 
 R10Decoder::~R10Decoder(){}
 
-GF2mat R10Encoder::get_mat()
+GF2mat R10Codec::get_mat()
 {
   return *A;
 }

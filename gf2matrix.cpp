@@ -24,11 +24,11 @@ GF2mat::GF2mat(int n_rows, int n_cols)
   n_word = (n_col + wordsize-1) >> wordmasksize;
 
   //cols = (uint32_t**) calloc(n_col, sizeof *cols);
-  rows = (uint32_t**) calloc(n_col, sizeof *rows);
+  rows = (uint32_t**) calloc(n_row, sizeof *rows);
   //gf2mat = (uint32_t*) calloc(n_word*n_col, sizeof *gf2mat);
   gf2mat = (uint32_t*) calloc(n_word*n_row, sizeof *gf2mat);
 
-  //Assign columns pointers: leap n_word words at a time
+  //Assign rows pointers: leap n_word words at a time
   for (int i = 0; i < n_row; i++)
     {
       //cols[i] = gf2mat  + i*(n_word);
@@ -36,7 +36,25 @@ GF2mat::GF2mat(int n_rows, int n_cols)
     }
 }
 
-GF2mat::~GF2mat(){}
+GF2mat::GF2mat (const GF2mat &A) {
+  n_col = A.n_col;
+  n_row = A.n_row;
+  n_word = A.n_word;
+  rows = (uint32_t**) calloc(n_col, sizeof *rows);
+  gf2mat = (uint32_t*) calloc(n_word*n_row, sizeof *gf2mat);
+  memcpy(gf2mat, A.gf2mat, n_word*n_row*sizeof(*gf2mat));
+  for (int i = 0; i < n_row; i++)
+    {
+      rows[i] = A.rows[i];
+    }
+
+}
+
+GF2mat::~GF2mat()
+{
+  free(rows);
+  free(gf2mat);
+}
 
 int GF2mat::get_nrows()
 {
@@ -46,6 +64,11 @@ int GF2mat::get_nrows()
 int GF2mat::get_ncols()
 {
   return n_col;
+}
+
+int GF2mat::get_nwords()
+{
+  return n_word;
 }
 
 int GF2mat::get_entry(int row, int col)
@@ -65,6 +88,36 @@ void GF2mat::row_exchange(int a, int b)
   uint32_t* temp = rows[a];
   rows[a] = rows[b];
   rows[b] = temp;
+}
+
+GF2mat GF2mat::operator*(GF2mat &v)
+{
+  if (this->n_col != v.n_row)
+    {
+      printf("Multiplication error: matrices dimensions mismatch\n");
+      exit(EXIT_FAILURE);
+    }
+  GF2mat R(this->n_row, v.n_col);
+  for (int i = 0; i < R.n_row; i++)
+    {
+      for (int j = 0; j < this->n_col; j++)
+	{
+	  if (this->get_entry(i,j))
+	    {
+	      for (int k = 0; k < R.n_word; k++)
+		{
+		  R.rows[i][k] ^= v.rows[j][k];
+		}
+	    }
+	}
+    }
+  return R;
+}
+
+void GF2mat::clear_LT(int K, int S, int H)
+{
+  for (int i = S+H; i < K; i++)
+    memset(rows[i], 0, n_word);
 }
 
 void GF2mat::invert_GE()
@@ -100,5 +153,4 @@ void GF2mat::print()
 	}
       std::cout << "\n";
     }
-  return;
 }

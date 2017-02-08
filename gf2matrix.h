@@ -27,6 +27,7 @@
 #include <string>
 #include <assert.h>
 #include <fstream>
+#include <cstring>
 
 /**
  * Class representing a GF(2) matrix.
@@ -44,6 +45,10 @@ class GF2mat
    * Destructor of the GF(2) matrix
    */
   ~GF2mat();
+    /**
+   * Copy-Constructor of the GF(2) matrix
+   */
+   GF2mat(const GF2mat &A);
   /**
    * Method for obtaining the number of rows
    */
@@ -52,6 +57,10 @@ class GF2mat
    * Method for obtaining the number of columns
    */
   int get_ncols();
+    /**
+   * Method for obtaining the number of words
+   */
+  int get_nwords();
   /**
    * Method for obtaining an entry of a GF2mat matrix
    */
@@ -64,12 +73,26 @@ class GF2mat
    * Method for exchanging 2 rows
    */
   void row_exchange(int a, int b);
-    /**
+   /**
    * Method for exchanging 2 columns
    */
-  void col_exchange();
+  void col_exchange(int a, int b);
+  /**
+   * Operator overloading for multiplying two GF2mat matrices.
+   * @param v GF2mat sencond operand
+   */
+  GF2mat operator*(GF2mat &v);
+  /**
+   * Method for setting to zero all the selected entries
+   * of the G_LT partof the GF2mat matrix.
+   * Specfically built for the R10Codec objects.
+   * @param K int number of source symbols
+   * @param S number of LDPC symbols
+   * @param H number of Half symbols
+   */
+  void clear_LT(int K, int S, int H);
     /**
-   * Method for inverting to Gaussian Elimination method.
+   * Method for inverting through Gaussian Elimination method.
    * Other methods, such as Belief Propagation or Inactivation Decoding
    * may be implemented in the future.
    */
@@ -80,16 +103,16 @@ class GF2mat
   void print();
 
  protected:
-  int n_col; /** Number of columns of the GF(2) matrix */
-  int n_row; /** Number of rows of the GF(2) matrix */
-  int n_word; /** Number of 32-bit words used to represent a single column*/
-  const int wordsize = 32; /** Number of bits that are group together. If needed */
-  const int wordmasksize = 5; /** Number of 1 bits in the word mask */
-  const int wordmask = 0x1f; /** Bitmask used to perfom modulo operation bitwisely */
+  int n_col; /**< Number of columns of the GF(2) matrix */
+  int n_row; /**< Number of rows of the GF(2) matrix */
+  int n_word; /**< Number of 32-bit words used to represent a single rows*/
+  const int wordsize = 32; /**< Number of bits that are group together. If needed */
+  const int wordmasksize = 5; /**< Number of 1 bits in the word mask */
+  const int wordmask = 0x1f; /**< Bitmask used to perfom modulo operation bitwisely */
 
-  uint32_t** cols; /** Main ref to tha matrix data. Pointer to array of pointers to columns */
-  uint32_t** rows; /** Main ref to tha matrix data. Pointer to array of pointers to rows */
-  uint32_t* gf2mat; /** Block of memory used to manage bits */
+  uint32_t** cols; /**< Main ref to the matrix data. Pointer to array of pointers to columns */
+  uint32_t** rows; /**< Main ref to the matrix data. Pointer to array of pointers to rows */
+  uint32_t* gf2mat; /**< Block of memory used to manage bits */
 
 };
 

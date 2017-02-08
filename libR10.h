@@ -56,6 +56,15 @@ class R10Codec
    * Destructor for the R10Codec class
    */
   ~R10Codec();
+  /**
+   * Method to print the generator matrix: used while
+   * developing to check consistency. Possibly TBE!
+   */
+  void print_matrix();
+  /**
+   * Obtain the constraint matrix for debugging purposes: TBE!
+   */
+  GF2mat get_mat();
 
  protected:
 
@@ -69,8 +78,46 @@ class R10Codec
    * Half symbols.
    */
   void setH();
+  /**
+   * Method used for generating a degree during the encoding process
+   */
+  uint32_t deg(uint16_t v);
+  /**
+   * Method to obtain the S LDPC intermediate symbols
+   */
+  void setLDPCSymbols();  
+  /**
+   * Method to obtain the H Half intermediate symbols.
+   * Basically circulant matrices.
+   */
+  void setHalfSymbols();
+  /**
+   * Method for building the Constraint Matrix.
+   * This is the upper part of matrix A and is built
+   * once and hen saved for each value of K.
+   */
+  void constraintMatrix();
+  /**
+   * Method for setting the LT symbols in the precode matrix.
+   * This is needed to make the code systematic.
+   */
+  void setLTSymbols();
+  /**
+   * Method for generating the triple that is used
+   * to generate an encoding symbol
+   */
+  void trip(uint8_t X, uint32_t* triple);
+  /**
+   * Method for obtaining random values to be used in
+   * the degree function and trip() function
+   */
+  uint32_t rand(uint16_t X, uint16_t i, uint16_t m);
+  /**
+   * Method used for the LT encoding process.
+   */
+  uint16_t LTEnc(uint16_t K, uint8_t* C, uint16_t* triple);
+
   
-  // V0 and V1 tables
   uint32_t V0[256] = {251291136, 3952231631, 3370958628, 4070167936, 123631495, 3351110283,
 		      3218676425, 2011642291, 774603218, 2402805061, 1004366930,
 		      1843948209, 428891132, 3746331984, 1591258008, 3067016507,
@@ -118,7 +165,7 @@ class R10Codec
 		      2217188075, 3756943137, 3077882590, 2054995199, 3081443129,
 		      3895398812, 1141097543, 2376261053, 2626898255, 2554703076,
 		      401233789, 1460049922, 678083952, 1064990737, 940909784, 1673396780,
-		      528881783, 1712547446, 3629685652, 1358307511};
+		      528881783, 1712547446, 3629685652, 1358307511}; /**< V0 */
 
   uint32_t V1[256] = {807385413, 2043073223, 3336749796, 1302105833, 2278607931, 541015020,
 		      1684564270, 372709334, 3508252125, 1768346005, 1270451292,
@@ -165,26 +212,38 @@ class R10Codec
 		      2800540462, 3733109044, 1235082423, 1765319556, 3174729780,
 		      3762994475, 3171962488, 442160826, 198349622, 45942637, 1324086311,
 		      2901868599, 678860040, 3812229107, 19936821, 1119590141, 3640121682,
-		      3545931032, 2102949142, 2828208598, 3603378023, 4135048896};
+		      3545931032, 2102949142, 2828208598, 3603378023, 4135048896}; /**< V1 */
   
-  int K; /** Number of input surce symbols*/
-  int N; /** Number of output encoding symbols for the first round*/
-  uint32_t f[8] = {0,10241,491582,712794,831695,948446,1032189,1048576}; /** Degree distribution f
-                                                                                           function */
-  uint8_t  d[7] = {1,2,3,4,10,11,40}; /** Degree distribution d function  */
+  uint32_t f[8] = {0,10241,491582,712794,831695,948446,1032189,1048576}; /**< Degree distribution f
+									    function */
+  uint8_t  d[7] = {1,2,3,4,10,11,40}; /**< Degree distribution d function  */
 
-  GF2mat* A; /** Constraint matrix */
+  uint16_t* J; /**< Systematic Index */
 
-  const uint16_t Q = 65521; /** Largest prime number smaller than 2**16 */
+  const uint16_t Q = 65521; /**< Largest prime number smaller than 2**16 */
+
+  GF2mat* A; /**< Constraint matrix */
+  GF2mat* G_LDPC; /**< LDPC part of the constraint matrix */
+  GF2mat* G_Half; /**< Half part of the constraint matrix */
   
-  int S;  /** Number of intermediate LDPC symbols */
-  int H;  /** Number of intermediate HDPC symbols */
-  int L;  /** Number of intermediate symbols in the Intermediate Block */
+  int K; /**< Number of input source symbols*/
+  int N; /**< Number of output encoding symbols for the first round*/
+  
+  int S;  /**< Number of intermediate LDPC symbols */
+  int H;  /**< Number of intermediate HDPC symbols (Half Symbols) */
+  int L;  /**< Number of intermediate symbols in the Intermediate Block */
+
+  uint16_t T; /**< Encoding Symbol Length (bytes)*/
+  uint16_t Z; /**< Number of Source Blocks*/
+  uint64_t F; /**< Transfer length of the object (bytes)*/
+  uint64_t P; /**< Payload size of each packet (bytes)*/
+  uint8_t W;  /**< Target on the sub block size (bytes)*/
 };
 
 
 class R10Encoder : public R10Codec
 {
+  
  public:
   /**
    * Constructor for the R10Encoder class
@@ -193,7 +252,7 @@ class R10Encoder : public R10Codec
    */
   R10Encoder(int K, int N);
   /**
-   * Destructor for the libR10Encoder class
+   * Destructor for the R10Encoder class
    */
   ~R10Encoder();
   /**
@@ -201,86 +260,32 @@ class R10Encoder : public R10Codec
    * is issued.
    */
   void start();
-
- public:
   /**
-   * Method used for generating a degree during the encoding process
+   * Method fr producing the intermediate symbols
    */
-  uint32_t deg(uint16_t v);
+  void int_symbols();
   /**
-   * Method to obtain the S LDPC intermediate symbols
+   * Main method used for encoding.
    */
-  void setLDPCSymbols();  
+  void encode(int X);
   /**
-   * Method to obtain the H Half intermediate symbols.
-   * Basically circulant matrices.
-   */
-  void setHalfSymbols();
-  /**
-   * Method for building the Constraint Matrix.
-   * This is the main block used for the encoding process.
-   */
-  void constraintMatrix();
-    /**
-   * Method for setting the LT symbols in the precode matrix.
-   * This is needed to make the code systematic.
-   */
-  void setLTSymbols();
-  /**
-   * Method for generating the triple that will be sent
-   * along with the encoded packet.
-   */
-  void trip(uint8_t X, uint16_t* triple);
-  /**
-   * Method for obtaining random values to be used in
-   * the degree function and trip function
-   */
-  uint32_t rand(uint16_t X, uint16_t i, uint16_t m);
-  /**
-   * Method used for the LT encoding process.
-   */
-  uint16_t LTEnc(uint16_t K, uint8_t* C, uint16_t* triple);
-  /**
-   * Main method used for encoding. Fuck you!
-   * Yes, fuck you!
-   */
-  void encode();
-  /**
-   * Main method used for decoding. Fuck you!
-   * Yes, fuck you!
+   * Main method used for decoding.
    */
   void decode();
-  /**
-   * Method to print the generator matrix: used while
-   * developing to check consistency. Possibly TBE!
-   */
-  void print_matrix();
-  /**
-   * Obtain the constraint matrix for debugging purposes: TBE!
-   */
-  GF2mat get_mat();
 
-  uint16_t T; /** Encoding Symbol Length (bytes)*/
-  uint16_t Z; /** number of Source Blocks*/
-  uint8_t N;  /** number of sub-Blocks*/
-  uint64_t F; /** transfer length of the object (bytes)*/
-  uint64_t P; /** payload size of each packet (bytes)*/
-  uint8_t W;  /** target on the sub block size (bytes)*/
-
-  //GF2mat A;    /** Generator matrix for the Code Constraints PreProcessor */
-  uint16_t* J; /** Systematic Index (defined in RFC5053) */
-
-  // Data used for decoding stream
-  uint16_t FECID;
-  uint16_t SBN;
-  uint16_t ESI;
-  uint16_t RESERVED; 
+ protected:
+  // Data used for keeping track of the stream
+  uint16_t FECID; /**< Value for the FEC ID (1 as per IANA definition)*/
+  uint16_t SBN; /**< Counter for the Source Block Number */
+  uint16_t ESI; /**< Counter for the Encoding Symbol ID */
+  uint16_t RESERVED; /**< Reserved field */
 
 };
 
 
 class R10Decoder : public R10Codec
 {
+
  public:
   /**
    * Constructor for the R10Decoder class
@@ -290,15 +295,27 @@ class R10Decoder : public R10Codec
    * Destructor for the R10Decoder class
    */
   ~R10Decoder();
+  /**
+   * Method for startin the decoder. It will stop when the stop command
+   * is issued.
+   */
+  void start();
+  /**
+   * Main method used for encoding.
+   */
+  void encode();
+  /**
+   * Main method used for decoding.
+   */
+  void decode();
 
  protected:
-  // Data used for decoding stream: encoder and decoder keep their own counters
-  uint16_t FECID; /** Value for the FEC ID (1 as per IANA def)*/
-  uint16_t SBN;   /** Counter for the Source Block Number */
-  uint16_t ESI;   /** Counter for the Encoding Symbol ID */
-  uint16_t RESERVED; /** Reserved field */
+  // Data used for keeping track of the stream
+  uint16_t FECID; /**< Value for the FEC ID (1 as per IANA definition)*/
+  uint16_t SBN; /**< Counter for the Source Block Number */
+  uint16_t ESI; /**< Counter for the Encoding Symbol ID */
+  uint16_t RESERVED; /**< Reserved field */
 
-  //GF2mat A;    /** Generator matrix for the Code Constraints PreProcessor */
 };
 
 #endif
