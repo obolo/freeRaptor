@@ -330,6 +330,12 @@ void R10Codec::trip(uint8_t X, uint32_t triple[])
 
 uint16_t R10Codec::LTEnc(uint16_t K, GF2mat C, uint16_t* triple)
 {
+
+  if (C.get_ncols() != 1)
+    {
+      printf("LT Encoding process error: wrong type Intermediate vector");
+      exit(EXIT_FAILURE);
+    }
   uint8_t L_ = L;
   while(!is_prime(L_))
     L_ = L_++;
