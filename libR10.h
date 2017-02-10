@@ -115,7 +115,7 @@ class R10Codec
   /**
    * Method used for the LT encoding process.
    */
-  uint16_t LTEnc(uint16_t K, uint8_t* C, uint16_t* triple);
+  uint16_t LTEnc(uint16_t K, GF2mat C, uint16_t* triple);
 
   
   uint32_t V0[256] = {251291136, 3952231631, 3370958628, 4070167936, 123631495, 3351110283,

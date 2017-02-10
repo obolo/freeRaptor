@@ -328,7 +328,7 @@ void R10Codec::trip(uint8_t X, uint32_t triple[])
   triple[2] = rand(Y_, 2, L_);       // b
 }
 
-uint16_t R10Codec::LTEnc(uint16_t K, uint8_t* C, uint16_t* triple)
+uint16_t R10Codec::LTEnc(uint16_t K, GF2mat C, uint16_t* triple)
 {
   uint8_t L_ = L;
   while(!is_prime(L_))
@@ -340,7 +340,7 @@ uint16_t R10Codec::LTEnc(uint16_t K, uint8_t* C, uint16_t* triple)
   while (b >= L)
     b = (b + a) % L_;
 
-  uint16_t result = C[b];
+  uint16_t result = C.get_entry(b,0);
 
   uint16_t cond = std::min(d-1, L-1);
   for (int j = 1; j < cond; j++)
@@ -350,7 +350,7 @@ uint16_t R10Codec::LTEnc(uint16_t K, uint8_t* C, uint16_t* triple)
 	{
 	  b = (b + a) % L_;
 	}
-      result = (uint16_t)result ^ (uint16_t)C[b];
+      result = (uint16_t)result ^ (uint16_t)C.get_entry(b,0);
     }
   return result;
 }
@@ -378,12 +378,12 @@ void R10Encoder::encode(int X)
   // Multiply by d: generate Intermediate Symbols
   GF2mat c = A_*D;
   // Produce LT symbols
-  for (uint8_t k = K; k < (uint8_t)(L); k++)
-    {
-      uint32_t* treep[3] = {0};
-      trip(k, treep);
-      uint16_t c_ = LTEnc(k, c, treep);
-    }
+  // for (uint8_t k = K; k < (uint8_t)(L); k++)
+  //   {
+  //     uint32_t* treep[3] = {0};
+  //     trip(k, treep);
+  //     uint16_t c_ = LTEnc(k, c, treep);
+  //   }
 }
 
 void R10Encoder::decode()
