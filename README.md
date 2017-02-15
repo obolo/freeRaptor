@@ -1,4 +1,4 @@
-# freeRaptor
+# ![image](https://github.com/obolo/freeRaptor/blob/master/freeR_icon.png) 
 
 ## A free and open (GPLv3) implementation of Raptor codes written in C++.
 
