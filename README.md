@@ -2,7 +2,7 @@
 
 ## A free and open (GPLv3) implementation of Raptor codes in C.
 
-The effort was made towards building a free and open piece of software that implements the Rator codes:
+The effort was made towards building a free and open piece of software that implements the Raptor codes:
 because the project originated from a telecommunication setting, complying to a standard looked
 like a good idea, thus the RFC 5053 was chosen as reference. The software is built as a
 library to include in your source code to use its objects.
@@ -38,7 +38,9 @@ While the decoder includes:
 
 There exists the will to implement also the RFC 6330, also referred to by RaptorQ or RQ, but this is left for future work.
 
-This software is licensed under the GPLv3 license, making it free for everyone tu use, improve and modify: see <http://www.gnu.org/licenses/>.
+## License
+
+This software is licensed under the GPLv3 license, making it free for everyone tu use, examine, improve and modify: see <http://www.gnu.org/licenses/>.
 
 ### References
 [1] RFC5053, M. Luby, A. Shokrollahi, M. Watson, T. Stockhammer, IETF Standards Track, Oct. 2007
