@@ -43,4 +43,5 @@ There exists the will to implement also the RFC 6330, also referred to by Raptor
 This software is licensed under the GPLv3 license, making it free for everyone tu use, examine, improve and modify: see <http://www.gnu.org/licenses/>.
 
 ### References
+
 [1] RFC5053, M. Luby, A. Shokrollahi, M. Watson, T. Stockhammer, IETF Standards Track, Oct. 2007
