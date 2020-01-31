@@ -19,7 +19,7 @@
  * @author  Roberto Francescon
  * @brief   Definition and implementation of Galois Field GF(2) matrices
  *          and vectors
- * @version 0.0.1
+ * @version 0.1.0
  * @file    gf2matrix.h
  */
 

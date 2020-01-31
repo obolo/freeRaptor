@@ -1,4 +1,5 @@
-#include <gf2matrix.h>
+#include "gf2matrix.h"
+#include "raptor10.h"
 
 int main(int argc, char* argv[])
 {
@@ -42,6 +43,8 @@ int main(int argc, char* argv[])
   allocate_gf2matrix(&result, 4, 4);
 
   mat_mul(&mat, &mat_, &result);
+
+  
 
   print_matrix(&result);
   
