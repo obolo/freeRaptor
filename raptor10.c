@@ -37,6 +37,23 @@ factorial(int n)
     return n*factorial(n-1);
 }
 
+int is_prime(uint16_t n)
+{
+	int flag = 0;
+	for (uint i = 2; i <= n / 2; ++i) {
+        // condition for non-prime
+        if (n % i == 0) {
+            flag = 1;
+            break;
+        }
+    }
+   if (flag == 0)
+	   return 1;
+   else
+	   return 0;
+
+}
+
 int
 choose(int i, int j)
 {
@@ -47,7 +64,10 @@ void
 Trip(uint16_t K, uint16_t X, uint16_t triple[3])
 {
   uint16_t L = K + S + H;
-  // int L_ = smallest prime greater than or equal to L
+  uint16_t L_ = L;
+  while (!is_prime(L_)) {
+	  L_++;
+  }
   
   uint16_t Q = 65521;
   uint16_t A = (53591 + J[K]*997) % Q;
@@ -66,7 +86,7 @@ Trip(uint16_t K, uint16_t X, uint16_t triple[3])
 uint16_t
 Rand(uint16_t X, uint16_t i, uint16_t m)
 {
-  return (V0[(X + i)] % 256 ^ V1[(floor(X / 256) + i) % 256]) % m;
+	return (V0[(X + i)] % 256 ^ V1[(uint16_t)(floor(X / 256) + i) % 256]) % m;
 }
 
 uint16_t
@@ -95,7 +115,7 @@ Deg(int v)
 }
 
 int
-build_LDPC_mat(int K, int S, Symbol C[K])
+build_LDPC_mat(int K, int S, uint8_t C[K])
 {
   int a = 0;
   int b = 0;
@@ -113,10 +133,10 @@ build_LDPC_mat(int K, int S, Symbol C[K])
 }
 
 int
-build_Half_mat(int K, int H, int S, Symbol C[K])
+build_Half_mat(int K, int H, int S, uint8_t C[K])
 {
-  uint32_t g[] = {0};
-  generate_gray_seq(&g);
+  uint32_t* g = malloc(sizeof(uint32_t));
+  generate_gray_seq(g);
 
   for (int h = 0; h < H; h++)
     {
@@ -132,11 +152,11 @@ build_Half_mat(int K, int H, int S, Symbol C[K])
 }
 
 void
-LTEnc(uint16_t K, uint16_t* C, uint16_t triple[3])
+LTEnc(uint16_t X, uint16_t K, uint16_t* C, uint16_t triple[3], uint16_t G)
 {
-  uint16_t d[G] = {0};
-  uint16_t a[G] = {0};
-  uint16_t b[G] = {0};
+  uint16_t d[] = {0};
+  uint16_t a[] = {0};
+  uint16_t b[] = {0};
 
   for (size_t i = 0; i < K; i++) {
     uint16_t triple[3] = {0};
@@ -148,10 +168,11 @@ LTEnc(uint16_t K, uint16_t* C, uint16_t triple[3])
 }
 
 int
-build_constraints_mat(R10* enc)
+build_constraints_mat(uint16_t K, uint16_t S, uint16_t L, R10* enc)
 {
-  gf2matrix G_LDPC;
-  build_LDPC_mat(enc, &G_LDPC);
+  /* gf2matrix G_LDPC; */
+  uint8_t G_LDPC[K];
+  build_LDPC_mat(K, S, G_LDPC);
 
   gf2matrix G_Half;
   // build_Half_mat(&G_Half);
