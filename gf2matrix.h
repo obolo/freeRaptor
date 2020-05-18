@@ -1,5 +1,5 @@
 /*
- *  Copyright 2019 Roberto Francescon
+ *  Copyright 2020 Roberto Francescon
  *  This file is part of freeRaptor.
  *
  *  freeRaptor is free software: you can redistribute it and/or modify
@@ -66,6 +66,11 @@ typedef struct
  * @param mat gf2matrix pointer to the selected matrix
  */
 void allocate_gf2matrix(gf2matrix* mat, uint32_t n_cols, uint32_t n_rows);
+
+/**
+ * Deallocate
+ */
+void dealloc_gf2matrix(gf2matrix* mat);
 
 /**
  * Function that returns the number of rows of a selected GF(2) matrix

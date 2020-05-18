@@ -1,5 +1,5 @@
 /*
- *  Copyright 2019 Roberto Francescon
+ *  Copyright 2020 Roberto Francescon
  *  This file is part of freeRaptor.
  *
  *  freeRaptor is free software: you can redistribute it and/or modify
@@ -44,6 +44,14 @@ void allocate_gf2matrix(gf2matrix* mat, uint32_t n_rows, uint32_t n_cols)
   mat->m_data = (word*)mat->rows[0];
 }
 
+void dealloc_gf2matrix(gf2matrix* mat)
+{
+  for (int i = 0; i <= mat->n_rows; i++)
+    {
+	  free(mat->rows[i]);
+	}
+  free(mat->rows);
+}
 
 uint32_t get_nrows(gf2matrix* mat)
 {
