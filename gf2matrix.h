@@ -64,11 +64,14 @@ typedef struct
  * Function that allocates the memory to accomodate for a GF(2) matrix.
  * The allocated memory is initialized to zero.
  * @param mat gf2matrix pointer to the selected matrix
+ * @param n_cols number of columns
+ * @param n_rows number of rows
  */
 void allocate_gf2matrix(gf2matrix* mat, uint32_t n_cols, uint32_t n_rows);
 
 /**
- * Deallocate
+ * Deallocate a gf2matrix
+ * @param mat matrix to deallocate
  */
 void dealloc_gf2matrix(gf2matrix* mat);
 
@@ -104,7 +107,7 @@ int get_entry(gf2matrix* mat, int n, int m);
 
 /**
  * Function that returns the pointer to a specific word at index l
- * @param mat
+ * @param mat gf2matrix from which to extract the word
  * @param n integer index of the selected row
  * @param l integer index of the selected word
  */
@@ -121,17 +124,17 @@ void set_entry(gf2matrix* mat, int n, int m, int val);
 
 /**
  * Function that swaps two rows of a given matrix
- * @param matrix whose rows have to swapped
- * @param index of the first row to swap
- * @param index of the second row to swap
+ * @param mat matrix whose rows have to swapped
+ * @param n index of the first row to swap
+ * @param k index of the second row to swap
  */
 void swap_rows(gf2matrix* mat, int n, int k);
 
 /**
  * Function that swaps two columns of a given matrix
- * @param matrix whose columns have to swapped
- * @param index of the first column to swap
- * @param index of the second column to swap
+ * @param mat matrix whose columns have to swapped
+ * @param m index of the first column to swap
+ * @param k index of the second column to swap
  */
 void swap_cols(gf2matrix* mat, int m, int k);
 
@@ -139,6 +142,7 @@ void swap_cols(gf2matrix* mat, int m, int k);
  * Function that prints the matrix.
  * All the matrix, so be careful.
  * Used for debugging purposes.
+ * @param mat gf2matrix to print
  */
 void print_matrix(gf2matrix* mat);
 

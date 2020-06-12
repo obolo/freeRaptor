@@ -41,4 +41,5 @@ This software is licensed under the GPLv3 license, making it free for everyone t
 ### References
 
 [1] RFC5053, M. Luby, A. Shokrollahi, M. Watson, T. Stockhammer, IETF Standards Track, Oct. 2007
+
 [2] Raptor Codes, A. Shokrollahi and M. Luby, Book in Foundations and Trends in Communications and Information Theory, January 2011

@@ -23,9 +23,9 @@ uint
 popcount(uint v) {
   uint c; // c accumulates the total bits set in v
   for (c = 0; v; c++)
-	{
-	  v &= v - 1; // clear the least significant bit set
-	}
+    {
+      v &= v - 1; // clear the least significant bit set
+    }
   return c;
 }
 
@@ -33,9 +33,9 @@ void
 generate_gray_seq(uint32_t* gray_seq)
 {
   for (uint32_t i = 0; i < 4000; i++)
-   {
-     gray_seq[i] = i ^ (uint32_t)(floor(i/2));
-   }
+    {
+      gray_seq[i] = i ^ (uint32_t)(floor(i/2));
+    }
 }
 
 int
@@ -47,20 +47,21 @@ factorial(int n)
     return n*factorial(n-1);
 }
 
-int is_prime(uint32_t n)
+int
+is_prime(uint32_t n)
 {
-	int flag = 0;
-	for (uint i = 2; i <= n / 2; ++i) {
-        // condition for non-prime
-        if (n % i == 0) {
-            flag = 1;
-            break;
-        }
+  int flag = 0;
+  for (uint i = 2; i <= n / 2; ++i) {
+    // condition for non-prime
+    if (n % i == 0) {
+      flag = 1;
+      break;
     }
-   if (flag == 0)
-	   return 1;
-   else
-	   return 0;
+  }
+  if (flag == 0)
+    return 1;
+  else
+    return 0;
 
 }
 
@@ -71,22 +72,22 @@ choose(int i, int j)
 }
 
 void
-Trip(uint32_t K, uint32_t X, uint32_t triple[3], Raptor10 obj)
+r10_Trip(uint32_t K, uint32_t X, uint32_t triple[3], Raptor10* obj)
 {
-  uint32_t L = obj.K + obj.S + obj.H;
-  uint32_t L_ = obj.L;
+  uint32_t L = obj->K + obj->S + obj->H;
+  uint32_t L_ = obj->L;
   while (!is_prime(L_)) {
-	  L_++;
+    L_++;
   }
 
   uint32_t Q = 65521;
   uint32_t A = (53591 + J[K-4]*997) % Q;
   uint32_t B = 10267 * (J[K-4]+1) % Q;
   uint32_t Y = (B + X*A) % Q;
-  uint32_t v = Rand(Y, 0, (uint32_t)pow(2.0,20.0));
-  uint32_t d = Deg(v);
-  uint32_t a = 1 + Rand(Y, 1, L_-1);
-  uint32_t b = Rand(Y, 2, L_);
+  uint32_t v = r10_Rand(Y, 0, (uint32_t)pow(2.0,20.0));
+  uint32_t d = r10_Deg(v);
+  uint32_t a = 1 + r10_Rand(Y, 1, L_-1);
+  uint32_t b = r10_Rand(Y, 2, L_);
 
   triple[0] = d;
   triple[1] = a;
@@ -94,13 +95,13 @@ Trip(uint32_t K, uint32_t X, uint32_t triple[3], Raptor10 obj)
 }
 
 uint32_t
-Rand(uint32_t X, uint32_t i, uint32_t m)
+r10_Rand(uint32_t X, uint32_t i, uint32_t m)
 {
   return (V0[(X + i) % 256] ^ V1[((uint32_t)floor(X/256) + i) % 256]) % m;
 }
 
 uint32_t
-Deg(uint32_t v)
+r10_Deg(uint32_t v)
 {
   if (v < 0 || v > 1048576)
     return -1; // invalid
@@ -123,7 +124,7 @@ Deg(uint32_t v)
 }
 
 int
-build_LDPC_mat(int K, int S, gf2matrix* A)
+r10_build_LDPC_submat(int K, int S, gf2matrix* A)
 {
   int a = 0;
   int b = 0;
@@ -132,19 +133,19 @@ build_LDPC_mat(int K, int S, gf2matrix* A)
     {
       a = 1 + ((int)floor(i/S) % (S-1));
       b = i % S;
-	  set_entry(A, b, i, 1);
+      set_entry(A, b, i, 1);
       /* C[K+b] = C[K+b] ^ C[i]; */
       b = (b + a) % S;
-	  set_entry(A, b, i, 1);
+      set_entry(A, b, i, 1);
       /* C[K+b] = C[K+b] ^ C[i]; */
       b = (b + a) % S;
-	  set_entry(A, b, i, 1);
+      set_entry(A, b, i, 1);
       /* C[K+b] = C[K+b] ^ C[i]; */
     }
 }
 
 int
-build_Half_mat(unsigned int K, unsigned int S, unsigned int H, gf2matrix* A)
+r10_build_Half_submat(unsigned int K, unsigned int S, unsigned int H, gf2matrix* A)
 {
   uint32_t g[4000];
   generate_gray_seq(&g[0]);
@@ -156,10 +157,10 @@ build_Half_mat(unsigned int K, unsigned int S, unsigned int H, gf2matrix* A)
 
   uint j = 0;
   for (size_t i = 0; i < n_words; i++) {
-  	if (popcount(g[i]) == H_) {
-  	  m[j] = g[i];
-  	  j++;
-  	}
+    if (popcount(g[i]) == H_) {
+      m[j] = g[i];
+      j++;
+    }
   }
 
   // Build the G_HALF submatrix
@@ -169,51 +170,86 @@ build_Half_mat(unsigned int K, unsigned int S, unsigned int H, gf2matrix* A)
         {
           if (m[j] & (1UL << h))
             {
-  			  set_entry(A, h+S, j, 1);
-              /* C[h + K + S] = C[h + K + S] ^ C[j]; */
+	      set_entry(A, h+S, j, 1);
             }
         }
     }
 }
 
 int
-build_LT_mat(uint32_t K, uint32_t S, uint32_t H, Raptor10 obj, gf2matrix* A)
+r10_build_LT_submat(uint32_t K, uint32_t S, uint32_t H, Raptor10* obj, gf2matrix* A)
 {
   uint32_t L = K + S + H;
   uint32_t L_ = L;
   while (!is_prime(L_)) {
-	L_++;
+    L_++;
   }
 
   for (uint32_t i = 0; i < K; i++) {
 
-  	uint32_t triple[3] = {0};
-  	Trip(K, i, triple, obj);
-  	uint32_t d = triple[0];
-  	uint32_t a = triple[1];
-  	uint32_t b = triple[2];
-  	uint32_t j_max = fmin((d-1),(L-1));
+    uint32_t triple[3] = {0};
+    r10_Trip(K, i, triple, obj);
+    uint32_t d = triple[0];
+    uint32_t a = triple[1];
+    uint32_t b = triple[2];
+    uint32_t j_max = fmin((d-1),(L-1));
 
-  	while (b >= L)
-  	  b = (b + a) % L_;
+    while (b >= L)
+      b = (b + a) % L_;
 
-  	set_entry(A, i+S+H, b, 1);
+    set_entry(A, i+S+H, b, 1);
 	
-  	for (uint j = 1; j <= j_max; j++) {
-  	  b = (b + a) % L_;
+    for (uint j = 1; j <= j_max; j++) {
+      b = (b + a) % L_;
 
-  	  while (b >= L)
-  		b = (b + a) % L_;
+      while (b >= L)
+	b = (b + a) % L_;
 
-  	  set_entry(A, i+S+H, b, 1);
-  	}
+      set_entry(A, i+S+H, b, 1);
+    }
 
   }
 
 }
 
 void
-LTEnc(uint32_t X, uint32_t K, uint32_t* C, uint32_t triple[3], uint32_t G,
+r10_build_LT_mat(uint32_t N, Raptor10* obj, gf2matrix* G_LT, uint32_t* ESIs)
+{
+  uint32_t L = obj->K + obj->S + obj->H;
+  uint32_t L_ = obj->L;
+  while (!is_prime(L_)) {
+    L_++;
+  }
+
+  for (uint32_t i = 0; i < obj->N; i++) {
+
+    uint32_t triple[3] = {0};
+    uint32_t X = ESIs[i];
+    r10_Trip(obj->K, X, triple, obj);
+    uint32_t d = triple[0];
+    uint32_t a = triple[1];
+    uint32_t b = triple[2];
+    uint32_t j_max = fmin((d-1),(obj->L-1));
+
+    while (b >= obj->L)
+      b = (b + a) % L_;
+
+    set_entry(G_LT, i, b, 1);
+	
+    for (uint j = 1; j <= j_max; j++) {
+      b = (b + a) % L_;
+
+      while (b >= obj->L)
+  	b = (b + a) % L_;
+
+      set_entry(G_LT, i, b, 1);
+    }
+
+  }
+}
+
+void
+r10_LTEnc(uint32_t X, uint32_t K, uint32_t* C, uint32_t triple[3], uint32_t G,
 	  Raptor10 obj)
 {
   uint32_t d[] = {0};
@@ -222,7 +258,7 @@ LTEnc(uint32_t X, uint32_t K, uint32_t* C, uint32_t triple[3], uint32_t G,
 
   for (size_t i = 0; i < K; i++) {
     uint32_t triple[3] = {0};
-    Trip(K, X+i, triple, obj);
+    r10_Trip(K, X+i, triple, &obj);
     d[i] = triple[0];
     a[i] = triple[1];
     b[i] = triple[2];
@@ -230,96 +266,121 @@ LTEnc(uint32_t X, uint32_t K, uint32_t* C, uint32_t triple[3], uint32_t G,
 }
 
 int
-build_constraints_mat(uint32_t K, uint32_t S, uint32_t L, Raptor10 obj)
+r10_build_constraints_mat(Raptor10* obj, gf2matrix* A)
 {
-  gf2matrix A;
-  allocate_gf2matrix(&A, obj.L, obj.L);
   
-  // gf2matrix G_LDPC
-  build_LDPC_mat(obj.K, obj.S, &A);
-  // gf2matrix G_Half
-  build_Half_mat(K, S, obj.H, &A);
-  // Identities matrices
-  for (int i = 0; i < obj.S; i++) {
-  	set_entry(&A, i, K+i, 1);
-  }
-  for (int i = 0; i < obj.H; i++) {
-  	set_entry(&A, S+i, K+S+i, 1);
-  }
-  // build_LT_mat
-  build_LT_mat(K, obj.S, obj.H, obj, &A);
+  // build G_LDPC and G_Half submatrices
+  r10_build_LDPC_submat(obj->K, obj->S, A);
+  r10_build_Half_submat(obj->K, obj->S, obj->H, A);
 
-  // INVERT A
+  // build identity matrices
+  for (int i = 0; i < obj->S; i++) {
+    set_entry(A, i, obj->K+i, 1);
+  }
+  for (int i = 0; i < obj->H; i++) {
+    set_entry(A, obj->S+i, obj->K+obj->S+i, 1);
+  }
+
+  // build the LT submatrix
+  r10_build_LT_submat(obj->K, obj->S, obj->H, obj, A);
+
+  // invert A
+  gaussjordan_inv(A);
 
   return 0;
   
 }
 
-void compute_params(Raptor10* obj)
+void
+r10_compute_params(Raptor10* obj)
 {
   if (obj->Al == 0 &&
-	  obj->K == 0 &&
-	  obj->Kmax == 0 &&
-	  obj->Kmin == 0 &&
-	  obj->Gmax == 0)
-	return;
-
-  // Check all rounding
-  /* obj->G = fmin(ceil((float)obj.P*(float)obj.Kmin/(float)obj.F), */
-  /* 					  (float)obj.P/(float)obj.Al); */
-  /* if (obj.Gmax < obj.G) */
-  /* 	obj.G = obj.Gmax; */
-
-  /* obj.T = floor((float)obj.P/ */
-  /* 					   ((float)obj.Al*(float)obj.G))*(float)obj.Al; */
-  /* float Kt = ceil((float)obj.F/(float)obj.T); */
-  /* obj.Z = ceil(Kt/(float)obj.Kmax); */
-  /* obj.N = fmin(ceil(ceil(Kt/(float)obj.Z)*(float)obj.T/(float)obj.W), */
-  /* 					 (float)obj.T/(float)obj.Al); */
-
-  /* obj.C  = malloc(obj.L*obj.T*sizeof(uint8_t)); // We don't know L yet */
-  /* obj.Cp = malloc(obj.K*obj.T*sizeof(uint8_t)); */
+      obj->K == 0 &&
+      obj->Kmax == 0 &&
+      obj->Kmin == 0 &&
+      obj->Gmax == 0)
+    return;
 
   uint32_t X=2;
   while (X*(X-1) < 2*obj->K)
-	X++;
+    X++;
 
+  // S number of LDPC symbols
   obj->S = 1;
   while (obj->S < ceil(0.01*obj->K) + X)
-	obj->S++;
+    obj->S++;
   
   obj->S++;
 
+  // H number of Half symbols
   obj->H = 1;
   while (choose(obj->H,ceil(obj->H/2)) < obj->K + obj->S)
-	obj->H++;
+    obj->H++;
 
+  // L number of intermediate symbols
   obj->L = obj->K + obj->S + obj->H;
 
 }
 
-void raptor10_decode(uint8_t *enc_s, R10 *obj)
+void
+r10_multiplication(Raptor10 *obj, gf2matrix* A, uint8_t* block, uint8_t* res_block)
 {
-  uint L = 256;
-  uint M = 256; // M = N + S + H: N is the numner of received symbols
-  uint16_t c[L];
-  uint16_t d[M];
-  uint16_t C[L];
-  uint16_t D[L];
+  int beg = 0;
+  for (uint j = 0; j < get_ncols(A); j++)
+    {
+      for (uint i = 0; i < get_nrows(A); i++)
+	{
+	  if (get_entry(A, i, j))
+	    {
+	      if (!beg)
+		for (uint t = 0; t < obj->T; t++)
+		  res_block[i+t] = block[j+t];
+	      else
+		for (uint t = 0; t < obj->T; t++)
+		  res_block[i+t] = res_block[i+t] ^ block[j+t];
+	    }
+	}
+    }
+}
 
-  // initialize c and d arrays. I like pussy most.
-  for (size_t i = 0; i < L; i++) {
-	c[i] = i;
-  }
+void
+r10_encode(uint8_t* src_s, uint8_t* enc_s, Raptor10* obj, gf2matrix* A)
+{
+  // Multiply contraints matrix with input block to obtain intermediate symbols
+  uint8_t int_symbols[obj->L];
+  r10_multiplication(obj, A, src_s, int_symbols);
 
-  for (size_t i = 0; i < M; i++) {
-	d[i] = i;
-  }
+  // Calculate the LT matrix and encoded symbols
+  gf2matrix G_LT;
+  allocate_gf2matrix(&G_LT, obj->L, obj->N);
 
-  gf2matrix A;
-  allocate_gf2matrix(&A, M, L);
-  gf2matrix *V = &A; // Maybe should be avoided...
+  // Create vector of ESIs
+  uint32_t ESIs[obj->N];
+  for (uint32_t i = 0; i < obj->N; i++)
+    ESIs[i] = i;
 
-  // First step
-    
+  // Buid the LT matrix and encode
+  r10_build_LT_mat(obj->N, obj, &G_LT, ESIs);
+  r10_multiplication(obj, A, int_symbols, enc_s);
+
+}
+
+void
+r10_decode(uint8_t* enc_s, uint8_t* dec_s, Raptor10* obj, gf2matrix* A, uint32_t N_, uint32_t* ESIs)
+{
+  // Calculate intermediate symbols
+  // Build constraint matrix
+
+  // To check if r10_build_constraints_mat relies on a already defined N !!!!
+  uint8_t int_symbols[obj->L];
+  r10_multiplication(obj, A, enc_s, int_symbols);
+
+  // Calculate the LT matrix and encoded symbols
+  gf2matrix G_LT;
+  allocate_gf2matrix(&G_LT, obj->L, obj->K);
+
+  // Buid the LT matrix and decode
+  r10_build_LT_mat(obj->K, obj, &G_LT, ESIs);
+  r10_multiplication(obj, A, int_symbols, enc_s);
+  
 }
