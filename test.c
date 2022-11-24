@@ -1,8 +1,7 @@
 #include <gf2matrix.h>
 #include <raptor10.h>
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   printf("Testing gf2matrix\n");
 
   // Create a Raptor10 object and fill it w/ all known needed params
@@ -11,7 +10,7 @@ int main(int argc, char* argv[])
 
   coder.K = K;
   coder.Kmin = 1024;
-  coder.Kmax =8192;
+  coder.Kmax = 8192;
   coder.Gmax = 10;
   coder.Al = 4;
   coder.N = 24;
@@ -25,8 +24,8 @@ int main(int argc, char* argv[])
   r10_build_constraints_mat(&coder, &A);
 
   // LT encode
-  uint8_t enc_s[coder.L*coder.T];
-  uint8_t src_s[coder.K*coder.T];
+  uint8_t enc_s[coder.L * coder.T];
+  uint8_t src_s[coder.K * coder.T];
   r10_encode(src_s, enc_s, &coder, &A);
 
   // Now, enc_s should contain the encoded symbols
@@ -34,5 +33,4 @@ int main(int argc, char* argv[])
 
   printf("Constraints matrix:\n");
   print_matrix(&A);
-  
 }

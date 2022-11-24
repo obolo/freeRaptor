@@ -28,9 +28,8 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-
+#include <string.h>
 
 /** Typedef word: here as a uint32_t type */
 typedef uint32_t word;
@@ -49,14 +48,13 @@ extern uint32_t wordshift;
  * Defualt word is 32 bit long as this is the smallest unit for the raptor
  * symbol.
  */
-typedef struct
-{
+typedef struct {
   uint32_t n_rows;
   uint32_t n_cols;
   uint32_t n_words;
 
-  word** rows;
-  word* m_data;
+  word **rows;
+  word *m_data;
 
 } gf2matrix;
 
@@ -67,34 +65,34 @@ typedef struct
  * @param n_cols number of columns
  * @param n_rows number of rows
  */
-void allocate_gf2matrix(gf2matrix* mat, uint32_t n_cols, uint32_t n_rows);
+void allocate_gf2matrix(gf2matrix *mat, uint32_t n_cols, uint32_t n_rows);
 
 /**
  * Deallocate a gf2matrix
  * @param mat matrix to deallocate
  */
-void dealloc_gf2matrix(gf2matrix* mat);
+void dealloc_gf2matrix(gf2matrix *mat);
 
 /**
  * Function that returns the number of rows of a selected GF(2) matrix
  * @param mat gf2matrix pointer to the selected matrix
  * @return integer number of rows
  */
-uint32_t get_nrows(gf2matrix* mat);
+uint32_t get_nrows(gf2matrix *mat);
 
 /**
  * Function that returns the number of columns of a selected GF(2) matrix
  * @param mat gf2matrix pointer to the selected matrix
  * @return integer number of columns
  */
-uint32_t get_ncols(gf2matrix* mat);
+uint32_t get_ncols(gf2matrix *mat);
 
 /**
  * Function that returns the number of columns of a selected GF(2) matrix
  * @param mat gf2matrix pointer to the selected matrix
  * @return integer number of columns
  */
-uint32_t get_nwords(gf2matrix* mat);
+uint32_t get_nwords(gf2matrix *mat);
 
 /**
  * Function that return the binary value at (n,m)
@@ -103,7 +101,7 @@ uint32_t get_nwords(gf2matrix* mat);
  * @param m integer index of the selected column
  * @return binary value of the entry at position (n,m)
  */
-int get_entry(gf2matrix* mat, int n, int m);
+int get_entry(gf2matrix *mat, int n, int m);
 
 /**
  * Function that returns the pointer to a specific word at index l
@@ -111,7 +109,7 @@ int get_entry(gf2matrix* mat, int n, int m);
  * @param n integer index of the selected row
  * @param l integer index of the selected word
  */
-word* get_word(gf2matrix* mat, int n, int l);
+word *get_word(gf2matrix *mat, int n, int l);
 
 /**
  * Function that set a particular bit to the selected value
@@ -120,7 +118,7 @@ word* get_word(gf2matrix* mat, int n, int l);
  * @param m integer index of the selected column
  * @param val value to set at position (n,m)
  */
-void set_entry(gf2matrix* mat, int n, int m, int val);
+void set_entry(gf2matrix *mat, int n, int m, int val);
 
 /**
  * Function that swaps two rows of a given matrix
@@ -128,7 +126,7 @@ void set_entry(gf2matrix* mat, int n, int m, int val);
  * @param n index of the first row to swap
  * @param k index of the second row to swap
  */
-void swap_rows(gf2matrix* mat, int n, int k);
+void swap_rows(gf2matrix *mat, int n, int k);
 
 /**
  * Function that swaps two columns of a given matrix
@@ -136,7 +134,7 @@ void swap_rows(gf2matrix* mat, int n, int k);
  * @param m index of the first column to swap
  * @param k index of the second column to swap
  */
-void swap_cols(gf2matrix* mat, int m, int k);
+void swap_cols(gf2matrix *mat, int m, int k);
 
 /**
  * Function that prints the matrix.
@@ -144,7 +142,7 @@ void swap_cols(gf2matrix* mat, int m, int k);
  * Used for debugging purposes.
  * @param mat gf2matrix to print
  */
-void print_matrix(gf2matrix* mat);
+void print_matrix(gf2matrix *mat);
 
 /**
  * Matrix multiplication done in the lest efficient way possible:
@@ -153,7 +151,7 @@ void print_matrix(gf2matrix* mat);
  * @param matB second matrix to multiply
  * @param return parameter result matrix
  */
-void mat_mul(gf2matrix* matA, gf2matrix* matB, gf2matrix* result);
+void mat_mul(gf2matrix *matA, gf2matrix *matB, gf2matrix *result);
 
 /**
  * Function that inverts the given matrix, if possible, through gasussian
@@ -161,6 +159,6 @@ void mat_mul(gf2matrix* matA, gf2matrix* matB, gf2matrix* result);
  * @param mat gf2matrix to which to apply the Gaussia-Elimination inversion
  * @return integer something NOT CLEAR
  */
-int gaussjordan_inv(gf2matrix* mat);
+int gaussjordan_inv(gf2matrix *mat);
 
 #endif
