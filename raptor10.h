@@ -51,10 +51,12 @@ typedef uint8_t *Symbol;
  * @var Raptor10::Kmin minimum target on the number of symbols per source block
  * @var Raptor10::Gmax maximum target number of symbols per packet
  * @var Raptor10::K denotes the number of symbols in a single source block
- * @var Raptor10::L denotes the number of pre-coding symbols for a single source
+ * @var Raptor10::L denotes the number of pre-coding symbols for a single
+ * source block
+ * @var Raptor10::S denotes the number of LDPC symbols for a single source
  * block
- * @var Raptor10::S denotes the number of LDPC symbols for a single source block
- * @var Raptor10::H denotes the number of Half symbols for a single source block
+ * @var Raptor10::H denotes the number of Half symbols for a single source
+ * block
  * @var Raptor10::G the number of symbols within an encoding symbol group
  * @var Raptor10::C denotes an array of intermediate symbols, C[0], C[1],
  * C[2],..., C[L-1]

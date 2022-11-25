@@ -1,5 +1,6 @@
 /*
  *  Copyright 2020 Roberto Francescon
+ *  Copyright 2022 Dominik Danelski
  *  This file is part of freeRaptor.
  *
  *  freeRaptor is free software: you can redistribute it and/or modify
@@ -108,8 +109,7 @@ uint32_t r10_Deg(uint32_t v) {
 }
 
 int r10_build_LDPC_submat(int K, int S, gf2matrix *A) {
-  int a = 0;
-  int b = 0;
+  int a = 0, b = 0;
 
   for (int i = 0; i < K; i++) {
     a = 1 + ((int)floor(i / S) % (S - 1));
@@ -257,25 +257,23 @@ int r10_build_constraints_mat(Raptor10 *obj, gf2matrix *A) {
 }
 
 void r10_compute_params(Raptor10 *obj) {
-  if (obj->Al == 0 && obj->K == 0 && obj->Kmax == 0 && obj->Kmin == 0 &&
-      obj->Gmax == 0)
+  if (!obj->Al && !obj->K && !obj->Kmax && !obj->Kmin && !obj->Gmax)
     return;
 
   uint32_t X = 2;
-  while (X * (X - 1) < 2 * obj->K)
-    X++;
+  for (; X * (X - 1) < 2 * obj->K; X++)
+    ;
 
   // S number of LDPC symbols
   obj->S = 1;
-  while (obj->S < ceil(0.01 * obj->K) + X)
-    obj->S++;
-
+  for (; obj->S < ceil(0.01 * obj->K) + X; obj->S++)
+    ;
   obj->S++;
 
   // H number of Half symbols
   obj->H = 1;
-  while (choose(obj->H, ceil(obj->H / 2)) < obj->K + obj->S)
-    obj->H++;
+  for (; choose(obj->H, ceil(obj->H / 2)) < obj->K + obj->S; obj->H++)
+    ;
 
   // L number of intermediate symbols
   obj->L = obj->K + obj->S + obj->H;
@@ -299,7 +297,8 @@ void r10_multiplication(Raptor10 *obj, gf2matrix *A, uint8_t *block,
 }
 
 void r10_encode(uint8_t *src_s, uint8_t *enc_s, Raptor10 *obj, gf2matrix *A) {
-  // Multiply constraints matrix with input block to obtain intermediate symbols
+  // Multiply constraints matrix with input block to obtain intermediate
+  // symbols
   uint8_t int_symbols[obj->L];
   r10_multiplication(obj, A, src_s, int_symbols);
 
