@@ -20,16 +20,6 @@
 #include <raptor10.h>
 #include <stdint.h>
 
-uint popcount(uint v) {
-  uint c; // c accumulates the total bits set in v
-
-  for (c = 0; v; c++) {
-    v &= v - 1; // clear the least significant bit set
-  }
-
-  return c;
-}
-
 void generate_gray_seq(uint32_t *gray_seq) {
   for (uint32_t i = 0; i < 4000; i++) {
     gray_seq[i] = i ^ (uint32_t)(floor(i / 2));
@@ -128,7 +118,7 @@ int r10_build_Half_submat(unsigned int K, unsigned int S, unsigned int H,
 
   uint j = 0;
   for (size_t i = 0; i < n_words; i++) {
-    if (popcount(g[i]) == H_) {
+    if (__builtin_popcount(g[i]) == H_) {
       m[j] = g[i];
       j++;
     }
