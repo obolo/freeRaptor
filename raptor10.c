@@ -88,24 +88,21 @@ uint32_t r10_Rand(uint32_t X, uint32_t i, uint32_t m) {
 }
 
 uint32_t r10_Deg(uint32_t v) {
-  if (v < 0 || v > 1048576)
-    return -1; // invalid
-
-  if (v >= 0 && v < 10241) {
+  if (v < 10241)
     return 1;
-  } else if (v >= 10241 && v < 491582) {
+  if (v < 491582)
     return 2;
-  } else if (v >= 491582 && v < 712794) {
+  if (v < 712794)
     return 3;
-  } else if (v >= 712794 && v < 831695) {
+  if (v < 831695)
     return 4;
-  } else if (v >= 831695 && v < 948446) {
+  if (v < 948446)
     return 10;
-  } else if (v >= 948446 && v < 1032189) {
+  if (v < 1032189)
     return 11;
-  } else if (v >= 1032189 && v < 1048576) {
+  if (v < 1048576)
     return 40;
-  }
+  return -1;
 }
 
 int r10_build_LDPC_submat(int K, int S, gf2matrix *A) {
