@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-extern uint32_t J[];
+extern const uint32_t J[];
 
 extern uint32_t V0[];
 
