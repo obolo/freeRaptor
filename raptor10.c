@@ -44,18 +44,13 @@ int factorial(int n) {
 }
 
 int is_prime(uint32_t n) {
-  int flag = 0;
-  for (uint i = 2; i <= n / 2; ++i) {
-    // condition for non-prime
-    if (n % i == 0) {
-      flag = 1;
-      break;
-    }
-  }
-  if (flag == 0)
-    return 1;
-  else
+  if (n <= 1)
     return 0;
+  for (uint32_t i = 2; i * i <= n; i++) {
+    if (!(n % i))
+      return 0;
+  }
+  return 1;
 }
 
 int choose(int i, int j) {
