@@ -306,11 +306,7 @@ r10_compute_params(Raptor10* obj)
     X++;
 
   // S number of LDPC symbols
-  obj->S = 1;
-  while (obj->S < ceil(0.01*obj->K) + X)
-    obj->S++;
-  
-  obj->S++;
+  for (obj->S = ceil(0.01 * obj->K) + X; !is_prime(obj->S); obj->S++);
 
   // H number of Half symbols
   obj->H = 1;
