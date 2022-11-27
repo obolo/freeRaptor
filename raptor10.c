@@ -301,9 +301,8 @@ r10_compute_params(Raptor10* obj)
       obj->Gmax == 0)
     return;
 
-  uint32_t X=2;
-  while (X*(X-1) < 2*obj->K)
-    X++;
+  uint32_t X = floor(sqrt(2 * obj->K));
+  for (; X * X < 2 * obj->K + X; X++);
 
   // S number of LDPC symbols
   for (obj->S = ceil(0.01 * obj->K) + X; !is_prime(obj->S); obj->S++);
