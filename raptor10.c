@@ -17,7 +17,7 @@
  */
 
 #include <math.h>
-#include <raptor10.h>
+#include "raptor10.h"
 #include <stdint.h>
 
 void generate_gray_seq(uint32_t *gray_seq) {
@@ -242,15 +242,13 @@ void r10_compute_params(Raptor10 *obj) {
   if (!obj->Al && !obj->K && !obj->Kmax && !obj->Kmin && !obj->Gmax)
     return;
 
-  uint32_t X = 2;
-  for (; X * (X - 1) < 2 * obj->K; X++)
+  uint32_t X = floor(sqrt(2 * obj->K));
+  for (; X * X < 2 * obj->K + X; X++)
     ;
 
   // S number of LDPC symbols
-  obj->S = 1;
-  for (; obj->S < ceil(0.01 * obj->K) + X; obj->S++)
+  for (obj->S = ceil(0.01 * obj->K) + X; !is_prime(obj->S); obj->S++)
     ;
-  obj->S++;
 
   // H number of Half symbols
   obj->H = 1;
