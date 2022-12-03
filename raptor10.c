@@ -16,8 +16,8 @@
  *  along with freeRaptor.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
 #include "raptor10.h"
+#include <math.h>
 #include <stdint.h>
 
 void generate_gray_seq(uint32_t *gray_seq) {
@@ -26,10 +26,12 @@ void generate_gray_seq(uint32_t *gray_seq) {
 }
 
 int factorial(int n) {
-  if (n == 0)
-    return 1;
-  else
-    return n * factorial(n - 1);
+  int result = 1, i;
+
+  for (i = 2; i <= n; i++)
+    result *= i;
+
+  return result;
 }
 
 int is_prime(uint32_t n) {
