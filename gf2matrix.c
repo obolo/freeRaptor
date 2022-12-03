@@ -38,9 +38,9 @@ void allocate_gf2matrix(gf2matrix *mat, uint32_t n_rows, uint32_t n_cols) {
 }
 
 void dealloc_gf2matrix(gf2matrix *mat) {
-  for (int i = 0; i <= mat->n_rows; i++) {
+  for (int i = 0; i <= mat->n_rows; i++)
     free(mat->rows[i]);
-  }
+
   free(mat->rows);
 }
 
@@ -132,17 +132,13 @@ int gaussjordan_inv(gf2matrix *mat) {
       swap_rows(mat, i, j);
     swap_rows(&identity, i, j);
 
-    for (int k = 0; k < nrows_mat; k++) {
-      if (k != i) {
-        if (get_entry(mat, k, i)) {
-          for (int l = 0; l < nwords_mat; l++) {
-            mat->rows[k][l] = mat->rows[k][l] ^ mat->rows[i][l];
-            (&identity)->rows[k][l] =
-                (&identity)->rows[k][l] ^ (&identity)->rows[i][l];
-          }
-        }
-      }
-    }
+      for (int k = 0; k < nrows_mat; k++)
+          if (k != i && get_entry(mat, k, i))
+              for (int l = 0; l < nwords_mat; l++) {
+                  mat->rows[k][l] = mat->rows[k][l] ^ mat->rows[i][l];
+                  (&identity)->rows[k][l] =
+                          (&identity)->rows[k][l] ^ (&identity)->rows[i][l];
+              }
   }
 
   *mat = identity;

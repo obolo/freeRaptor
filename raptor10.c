@@ -21,9 +21,8 @@
 #include <stdint.h>
 
 void generate_gray_seq(uint32_t *gray_seq) {
-  for (uint32_t i = 0; i < 4000; i++) {
+  for (uint32_t i = 0; i < 4000; i++)
     gray_seq[i] = i ^ (uint32_t)(floor(i / 2));
-  }
 }
 
 int factorial(int n) {
@@ -36,10 +35,11 @@ int factorial(int n) {
 int is_prime(uint32_t n) {
   if (n <= 1)
     return 0;
-  for (uint32_t i = 2; i * i <= n; i++) {
+
+  for (uint32_t i = 2; i * i <= n; i++)
     if (!(n % i))
       return 0;
-  }
+
   return 1;
 }
 
@@ -50,9 +50,8 @@ int choose(int i, int j) {
 void r10_Trip(uint32_t K, uint32_t X, uint32_t triple[3], Raptor10 *obj) {
   uint32_t L = obj->K + obj->S + obj->H;
   uint32_t L_ = obj->L;
-  while (!is_prime(L_)) {
+  while (!is_prime(L_))
     L_++;
-  }
 
   uint32_t Q = 65521;
   uint32_t A = (53591 + J[K - 4] * 997) % Q;
@@ -117,12 +116,11 @@ int r10_build_Half_submat(unsigned int K, unsigned int S, unsigned int H,
   uint32_t m[n_words];
 
   uint j = 0;
-  for (size_t i = 0; i < n_words; i++) {
+  for (size_t i = 0; i < n_words; i++)
     if (__builtin_popcount(g[i]) == H_) {
       m[j] = g[i];
       j++;
     }
-  }
 
   // Build the G_HALF submatrix
   for (uint h = 0; h < H; h++) {
@@ -138,9 +136,8 @@ int r10_build_LT_submat(uint32_t K, uint32_t S, uint32_t H, Raptor10 *obj,
                         gf2matrix *A) {
   uint32_t L = K + S + H;
   uint32_t L_ = L;
-  while (!is_prime(L_)) {
+  while (!is_prime(L_))
     L_++;
-  }
 
   for (uint32_t i = 0; i < K; i++) {
     uint32_t triple[3] = {0};
@@ -170,9 +167,8 @@ void r10_build_LT_mat(uint32_t N, Raptor10 *obj, gf2matrix *G_LT,
                       uint32_t *ESIs) {
   uint32_t L = obj->K + obj->S + obj->H;
   uint32_t L_ = obj->L;
-  while (!is_prime(L_)) {
+  while (!is_prime(L_))
     L_++;
-  }
 
   for (uint32_t i = 0; i < obj->N; i++) {
 
@@ -222,12 +218,10 @@ int r10_build_constraints_mat(Raptor10 *obj, gf2matrix *A) {
   r10_build_Half_submat(obj->K, obj->S, obj->H, A);
 
   // build identity matrices
-  for (int i = 0; i < obj->S; i++) {
+  for (int i = 0; i < obj->S; i++)
     set_entry(A, i, obj->K + i, 1);
-  }
-  for (int i = 0; i < obj->H; i++) {
+  for (int i = 0; i < obj->H; i++)
     set_entry(A, obj->S + i, obj->K + obj->S + i, 1);
-  }
 
   // build the LT submatrix
   r10_build_LT_submat(obj->K, obj->S, obj->H, obj, A);
@@ -251,8 +245,7 @@ void r10_compute_params(Raptor10 *obj) {
     ;
 
   // H number of Half symbols
-  obj->H = 1;
-  for (; choose(obj->H, ceil(obj->H / 2)) < obj->K + obj->S; obj->H++)
+  for (obj->H = 1; choose(obj->H, ceil(obj->H / 2)) < obj->K + obj->S; obj->H++)
     ;
 
   // L number of intermediate symbols
@@ -262,8 +255,8 @@ void r10_compute_params(Raptor10 *obj) {
 void r10_multiplication(Raptor10 *obj, gf2matrix *A, uint8_t *block,
                         uint8_t *res_block) {
   int beg = 0;
-  for (uint j = 0; j < get_ncols(A); j++) {
-    for (uint i = 0; i < get_nrows(A); i++) {
+  for (uint j = 0; j < get_ncols(A); j++)
+    for (uint i = 0; i < get_nrows(A); i++)
       if (get_entry(A, i, j)) {
         if (!beg)
           for (uint t = 0; t < obj->T; t++)
@@ -272,8 +265,6 @@ void r10_multiplication(Raptor10 *obj, gf2matrix *A, uint8_t *block,
           for (uint t = 0; t < obj->T; t++)
             res_block[i + t] = res_block[i + t] ^ block[j + t];
       }
-    }
-  }
 }
 
 void r10_encode(uint8_t *src_s, uint8_t *enc_s, Raptor10 *obj, gf2matrix *A) {
