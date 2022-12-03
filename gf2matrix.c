@@ -19,6 +19,11 @@
 #include <gf2matrix.h>
 #include <math.h>
 
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
 uint32_t wordsize = 8 * sizeof(word);
 uint32_t wordbitmask = 8 * sizeof(word);
 uint32_t wordshift = 5;
@@ -114,12 +119,8 @@ int gaussjordan_inv(gf2matrix *mat) {
 
   uint32_t nrows_identity = get_nrows(&identity);
   uint32_t ncols_identity = get_ncols(&identity);
-  for (int i = 0; i < nrows_identity; i++) {
-    for (int j = 0; j < ncols_identity; j++) {
-      if (i == j)
-        set_entry(&identity, i, j, 1);
-    }
-  }
+  for (int i = 0; i < min(nrows_identity, ncols_identity); i++)
+      set_entry(&identity, i, i, 1);
 
   uint32_t nrows_mat = get_nrows(mat);
   uint32_t ncols_mat = get_ncols(mat);
