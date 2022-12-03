@@ -1,5 +1,6 @@
 /*
  *  Copyright 2020 Roberto Francescon
+ *  Copyright 2022 Dominik Danelski
  *  This file is part of freeRaptor.
  *
  *  freeRaptor is free software: you can redistribute it and/or modify
@@ -17,6 +18,7 @@
 
 /**
  * @author  Roberto Francescon
+ * @author  Dominik Danelski (Etua)
  * @brief   Definition and implementation of Galois Field GF(2) matrices
  *          and vectors
  * @version 0.0.1
@@ -143,6 +145,15 @@ void swap_cols(gf2matrix *mat, int m, int k);
  * @param mat gf2matrix to print
  */
 void print_matrix(gf2matrix *mat);
+
+/**
+ * Function allocating space and filling an identity matrix
+ * @param identity pointer under which the matrix should be allocated
+ * @param ncols number of columns
+ * @param nrows number of rows
+ */
+void create_identity_matrix(gf2matrix *identity, uint32_t ncols,
+                            uint32_t nrows);
 
 /**
  * Matrix multiplication done in the lest efficient way possible:
