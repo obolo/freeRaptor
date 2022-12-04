@@ -1,7 +1,7 @@
 #include <gf2matrix.h>
 #include <raptor10.h>
 
-int main(int argc, char *argv[]) {
+int main() {
   printf("Testing gf2matrix\n");
 
   // Create a Raptor10 object and fill it w/ all known needed params
