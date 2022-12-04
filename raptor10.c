@@ -59,7 +59,8 @@ void r10_Trip(uint32_t K, uint32_t X, uint32_t triple[3], Raptor10 *obj) {
   uint32_t A = (53591 + J[K - 4] * 997) % Q;
   uint32_t B = 10267 * (J[K - 4] + 1) % Q;
   uint32_t Y = (B + X * A) % Q;
-  uint32_t v = r10_Rand(Y, 0, (uint32_t)pow(2.0, 20.0));
+  // r10_Rand is passed 2^^20 as required by the RFC5053
+  uint32_t v = r10_Rand(Y, 0, (2 << 15) * (2 << 3));
   uint32_t d = r10_Deg(v);
   uint32_t a = 1 + r10_Rand(Y, 1, L_ - 1);
   uint32_t b = r10_Rand(Y, 2, L_);
